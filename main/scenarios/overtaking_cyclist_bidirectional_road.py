@@ -2516,7 +2516,7 @@ if __name__ == '__main__':
     # Currently, the program will produce .txt file (stakeholder_weight_analysis_formatted.txt), which should be copy paste to:
     # /Users/lsuryana/Library/CloudStorage/GoogleDrive-lucaselbert@gmail.com/My Drive/PhD/Publication/IAVVC_2025
     # Then run analysis.ipynb last slide
-    main(replanner=False, vis_frame=True, save_weight_table=False)
+    main(replanner=True, vis_frame=True, save_weight_table=False)
 
     # Get the current script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
