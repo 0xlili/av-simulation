@@ -2526,6 +2526,7 @@ def run_simulation():
     # Define paths
     script_dir = Path(__file__).resolve().parent
     results_folder = script_dir.parent / "results" / "reasons_evaluation"
+    scenarios_folder = script_dir.parent / "scenarios" 
 
     # Change to results folder
     os.chdir(results_folder)
@@ -2549,6 +2550,7 @@ def run_simulation():
         st.video(video_bytes)
     else:
         st.error("Video generation failed. Make sure the simulation produced frames.")
+    os.chdir(scenarios_folder)
 
 
 # Streamlit interface
