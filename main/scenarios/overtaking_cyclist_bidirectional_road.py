@@ -2509,34 +2509,52 @@ def save_vehicle_data(simulation, time_values, reasons_policymaker_values, reaso
             writer.writerow(row)
     logger.info("Vehicle data saved")
 
-if __name__ == '__main__':
-    # Run the simulation with supervision disabled
-    # Steps:
-    # If you want to perform weight analysis, set save_weight_table to True and vis_frame can be set False to save time.
-    # Currently, the program will produce .txt file (stakeholder_weight_analysis_formatted.txt), which should be copy paste to:
-    # /Users/lsuryana/Library/CloudStorage/GoogleDrive-lucaselbert@gmail.com/My Drive/PhD/Publication/IAVVC_2025
-    # Then run analysis.ipynb last slide
+
+import os
+import subprocess
+import streamlit as st
+from pathlib import Path
+
+# Assuming main() is already defined somewhere in this file
+# If it's in another module, you can import it like:
+# from some_module import main
+
+def run_simulation():
+    # Run the simulation
     main(replanner=True, vis_frame=True, save_weight_table=False)
 
-    # Get the current script's directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Define paths
+    script_dir = Path(__file__).resolve().parent
+    results_folder = script_dir.parent / "results" / "reasons_evaluation"
 
-    # Define the results folder relative to the script's directory
-    results_folder = os.path.join(script_dir, "..", "results", "reasons_evaluation")
-
-    # Change to the results folder
+    # Change to results folder
     os.chdir(results_folder)
-    logger.info(f"Changed directory to: {os.getcwd()}")
+    st.info(f"Changed directory to: {results_folder}")
 
-    # Remove the last 15 frames before creating the video
-    # WHY? IN THE LAST FRAMES WE MAKE A STOP, SO IT IS NOT INTERESTING TO SEE
+    # Optional: remove the last 30 frames if needed
     # frame_files = sorted([f for f in os.listdir(results_folder) if f.startswith('frame_') and f.endswith('.jpg')])
     # for frame_file in frame_files[-30:]:
     #     os.remove(os.path.join(results_folder, frame_file))
 
-    # Run the ffmpeg command to create a video from frames
+    # Generate output video using ffmpeg
     subprocess.run([
-        'ffmpeg', '-framerate', '10', '-i', 'frame_%04d.jpg',
+        'ffmpeg', '-y', '-framerate', '10', '-i', 'frame_%04d.jpg',
         '-c:v', 'libx264', '-pix_fmt', 'yuv420p', 'output_video.mp4'
     ])
 
+    # Display the video in Streamlit
+    video_path = results_folder / "output_video.mp4"
+    if video_path.exists():
+        video_bytes = video_path.read_bytes()
+        st.video(video_bytes)
+    else:
+        st.error("Video generation failed. Make sure the simulation produced frames.")
+
+
+# Streamlit interface
+st.title("Overtaking Cyclist Bidirectional Road Simulation")
+
+if st.button("Run Simulation"):
+    # Change to main/scenarios to reset path before running simulation
+    os.chdir(Path(__file__).resolve().parent)
+    run_simulation()
