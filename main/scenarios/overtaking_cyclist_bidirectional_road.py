@@ -37,7 +37,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
@@ -79,7 +79,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, replanner: bool = Fals
 
     # Run motion primitive search
     cost, path, trajectory_full, search_runtime = run_motion_primitive_search(scenario_no_obstacles, car_dimensions,
-                                                                              mps)
+                                                                              mps,xxx=xxx, yyy=yyy, zzz=zzz)
 
     # Initialize MPC, set max speed to cyclist speed if the AV is following the cyclist
     if IS_FOLLOWING == True:
@@ -151,7 +151,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, replanner: bool = Fals
                             trajs_moving_obstacles, scenario_visualization,
                             reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                             reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                            time_values,
+                            time_values, xxx=xxx, yyy=yyy, zzz=zzz,
                             max_speed=MPCParameters.MAX_SPEED_FREEWAY,
                             is_following=IS_FOLLOWING,
                             vis_frame=vis_frame,
@@ -291,7 +291,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, arterial, ca
                    trajs_moving_obstacles, scenario_visualization,
                    reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                    reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                   time_values, max_speed,
+                   time_values, max_speed, xxx, yyy, zzz,
                    is_following=True, vis_frame=False, save_weight_table=False, time_elapsed_driver=0.0, time_passed_cyclist=0.0):
     """
     Perform a replan based on the current state and moving obstacles.
@@ -327,7 +327,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, arterial, ca
     logger.info(f"Initial position: {scenario_obstacles.start}")
 
     # Perform motion primitive search
-    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, margin=car_dimensions.radius,
+    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, xxx=xxx, yyy=yyy, zzz=zzz, margin=car_dimensions.radius,
                                    moving_obstacles_state=bicycle_state,
                                     driver_elapsed_time=time_elapsed_driver,
                                     cyclist_elapsed_time=time_passed_cyclist
@@ -1942,7 +1942,7 @@ def reasons_evaluation(reasons_cyclist_comfort, reasons_driver_time_eff, reasons
     return replan_needed, replan_tracker
 
 
-def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps) -> tuple:
+def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx, yyy, zzz) -> tuple:
     """
     Run the motion primitive search algorithm.
 
@@ -1955,7 +1955,7 @@ def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps) -> t
         tuple: A tuple containing the cost, path, and trajectory.
     """
     start_time = time.time()
-    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, margin=car_dimensions.radius)
+    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx=xxx, yyy=yyy, zzz=zzz, margin=car_dimensions.radius)
     cost, path, trajectory_full = search.run(debug=True)
     logger.info("Search finished")
     plot_motion_primitives(search, scenario_no_obstacles, path, car_dimensions)
@@ -2520,9 +2520,9 @@ from pathlib import Path
 
 # Assuming main() is already defined somewhere above or imported
 
-def run_simulation(weightofpolicy, weightofdriver, weightofcyclist):
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz,):
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, replanner=True, vis_frame=True, save_weight_table=False)
+    main(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
 
     # Define paths
     script_dir = Path(__file__).resolve().parent
@@ -2575,4 +2575,4 @@ if st.button("Run Simulation"):
     # Change to main/scenarios to reset path before running simulation
     os.chdir(Path(__file__).resolve().parent)
 
-    run_simulation(norm_policy, norm_driver, norm_cyclist)
+    run_simulation(norm_policy, norm_driver, norm_cyclist, 0.3, 0.3, 0.3)
