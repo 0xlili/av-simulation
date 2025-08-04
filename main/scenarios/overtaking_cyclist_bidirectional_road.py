@@ -37,7 +37,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
@@ -147,7 +147,7 @@ def main(replanner: bool = False, vis_frame: bool = False, save_weight_table: bo
                 IS_FOLLOWING = False
                 # change max_speed of the MPC to 30/3.6
                 collision_xy, mpc, traj_agent_idx, trajectory_full, scenario_obstacles = perform_replan(
-                            arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
+                            weightofpolicy, weightofdriver, weightofcyclist, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
                             trajs_moving_obstacles, scenario_visualization,
                             reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                             reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
@@ -287,7 +287,7 @@ def update_trajectory_index(state, tmp_trajectory, traj_agent_idx, trajectory_fu
     return traj_agent_idx
 
 
-def perform_replan(arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
+def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
                    trajs_moving_obstacles, scenario_visualization,
                    reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                    reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
@@ -360,6 +360,9 @@ def perform_replan(arterial, car_dimensions, bicycle_dimensions, dl, moving_obst
         )
 
     agent_weights, eval_results = evaluate_trajectories_for_reasons(
+        weightofpolicy,
+        weightofdriver,
+        weightofcyclist,
         trajectories_full,
         moving_obstacles,
         state,
@@ -1230,7 +1233,7 @@ def balance_function(weights, ideal_weights=None):
     # Combine the two balance measures
     return distribution_balance * min_weight_ratio
 
-def evaluate_trajectories_for_reasons(trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions,
+def evaluate_trajectories_for_reasons(weightofpolicy, weightofdriver, weightofcyclist, trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions,
                                       reasons_cyclist_comfort, reasons_driver_time_eff,
                                       reasons_policymaker_reg_compliance,
                                       time_elapsed_driver=0.0, time_passed_cyclist=0.0):
@@ -1358,9 +1361,9 @@ def evaluate_trajectories_for_reasons(trajectories_full, moving_obstacles, state
         # 6. Calculate weighted total score
         # Define weights for different agents (matching your existing weights)
         agent_weights = {
-            'policymaker': 1/3,  # Regulatory compliance
-            'driver': 1/3,  # Driver patience/efficiency
-            'cyclist': 1/3  # Cyclist comfort/safety
+            'policymaker': weightofpolicy,  # Regulatory compliance
+            'driver': weightofdriver,  # Driver patience/efficiency
+            'cyclist': weightofcyclist  # Cyclist comfort/safety
         }
 
         print(f"Agent Weights: {agent_weights}")
@@ -2515,13 +2518,11 @@ import subprocess
 import streamlit as st
 from pathlib import Path
 
-# Assuming main() is already defined somewhere in this file
-# If it's in another module, you can import it like:
-# from some_module import main
+# Assuming main() is already defined somewhere above or imported
 
-def run_simulation():
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist):
     # Run the simulation
-    main(replanner=True, vis_frame=True, save_weight_table=False)
+    main(weightofpolicy, weightofdriver, weightofcyclist, replanner=True, vis_frame=True, save_weight_table=False)
 
     # Define paths
     script_dir = Path(__file__).resolve().parent
@@ -2556,7 +2557,22 @@ def run_simulation():
 # Streamlit interface
 st.title("Overtaking Cyclist Bidirectional Road Simulation")
 
+# Sliders for weights
+weight_policy = st.slider("Weight of Policy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+weight_driver = st.slider("Weight of Driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+weight_cyclist = st.slider("Weight of Cyclist", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
 if st.button("Run Simulation"):
+    # Normalize weights so they sum to 1 (if all zero, fallback to equal weights)
+    total = weight_policy + weight_driver + weight_cyclist
+    if total == 0:
+        norm_policy = norm_driver = norm_cyclist = 1/3
+    else:
+        norm_policy = weight_policy / total
+        norm_driver = weight_driver / total
+        norm_cyclist = weight_cyclist / total
+
     # Change to main/scenarios to reset path before running simulation
     os.chdir(Path(__file__).resolve().parent)
-    run_simulation()
+
+    run_simulation(norm_policy, norm_driver, norm_cyclist)
