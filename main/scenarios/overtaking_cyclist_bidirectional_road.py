@@ -2557,22 +2557,40 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zz
 # Streamlit interface
 st.title("Overtaking Cyclist Bidirectional Road Simulation")
 
-# Sliders for weights
-weight_policy = st.slider("Weight of Policy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-weight_driver = st.slider("Weight of Driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-weight_cyclist = st.slider("Weight of Cyclist", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+# --- 1st weight set ---
+with st.container():
+    st.subheader("1st weight set")
+    weight_policy = st.slider("Weight of Policy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    weight_driver = st.slider("Weight of Driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    weight_cyclist = st.slider("Weight of Cyclist", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
+# --- 2nd weight set ---
+with st.container():
+    st.subheader("2nd weight set")
+    weight_xxx = st.slider("xxx", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    weight_yyy = st.slider("yyy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    weight_zzz = st.slider("zzz", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
 
 if st.button("Run Simulation"):
-    # Normalize weights so they sum to 1 (if all zero, fallback to equal weights)
-    total = weight_policy + weight_driver + weight_cyclist
-    if total == 0:
-        norm_policy = norm_driver = norm_cyclist = 1/3
+    # Normalize 1st set
+    total1 = weight_policy + weight_driver + weight_cyclist
+    if total1 == 0:
+        norm_policy = norm_driver = norm_cyclist = round(1/3, 1)
     else:
-        norm_policy = weight_policy / total
-        norm_driver = weight_driver / total
-        norm_cyclist = weight_cyclist / total
+        norm_policy = round(weight_policy / total1, 1)
+        norm_driver = round(weight_driver / total1, 1)
+        norm_cyclist = round(weight_cyclist / total1, 1)
+
+    # Normalize 2nd set
+    total2 = weight_xxx + weight_yyy + weight_zzz
+    if total2 == 0:
+        xxx = yyy = zzz = round(1/3, 1)
+    else:
+        xxx = round(weight_xxx / total2, 1)
+        yyy = round(weight_yyy / total2, 1)
+        zzz = round(weight_zzz / total2, 1)
 
     # Change to main/scenarios to reset path before running simulation
     os.chdir(Path(__file__).resolve().parent)
 
-    run_simulation(norm_policy, norm_driver, norm_cyclist, 0.3, 0.3, 0.3)
+    run_simulation(norm_policy, norm_driver, norm_cyclist, xxx, yyy, zzz)
