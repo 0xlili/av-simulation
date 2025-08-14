@@ -2650,6 +2650,10 @@ with st.expander("Expand to edit simulation parameters"):
 
 if st.button("Run Simulation"):
     st.info("Running simulation...")
+    
+    # Embed the YouTube video to play while the simulation runs
+    # You can change the video URL to any video you like.
+    st.video('https://www.youtube.com/watch?v=Wy3Xd-6m4wk')
 
     # Normalize 1st set
     total1 = weight_policy + weight_driver + weight_cyclist
