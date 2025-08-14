@@ -2327,13 +2327,13 @@ def plot_reasons(ax, time_values, reasons_policymaker_values, reasons_driver_val
 
     ax.clear()  # Clear the axis for each new update
 
-    '''
+    ignorethis = '''
     ax.plot(time_values, reasons_policymaker_values, label=r'$R_{policymaker}$', color=colors[0],
-             linestyle='--', linewidth=2)
+             linestyle='--', linewidth=2);
     ax.plot(time_values, reasons_driver_values, label=r'$R_{driver}$', color=colors[1], linestyle='--',
-             linewidth=2)
+             linewidth=2);
     ax.plot(time_values, reasons_cyclist_values, label=r'$R_{cyclist}$', color=colors[2], linestyle='--',
-             linewidth=2)    
+             linewidth=2);
     '''
     ax.plot(time_values, reasons_policymaker_values, label=r'Regulatory compliance', color=colors[0],
              linestyle='--', linewidth=2)
