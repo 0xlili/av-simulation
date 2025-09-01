@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import time
+import importlib
 from typing import List
 
 # Third-party libraries
@@ -2694,8 +2695,13 @@ if st.button("Run Simulation"):
     # Update parameters file before running the simulation
     update_parameters_file(params_to_update)
     st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
+    
+
 
     # Change to main/scenarios to reset path before running simulation
     os.chdir(Path(__file__).resolve().parent)
+    import lib.parameters
+    importlib.reload(lib.parameters)
+    from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
 
     run_simulation(norm_policy, norm_driver, norm_cyclist, xxx, yyy, zzz)
