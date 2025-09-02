@@ -38,7 +38,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
@@ -148,7 +148,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz, replann
                 IS_FOLLOWING = False
                 # change max_speed of the MPC to 30/3.6
                 collision_xy, mpc, traj_agent_idx, trajectory_full, scenario_obstacles = perform_replan(
-                            weightofpolicy, weightofdriver, weightofcyclist, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
+                            weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
                             trajs_moving_obstacles, scenario_visualization,
                             reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                             reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
@@ -288,7 +288,7 @@ def update_trajectory_index(state, tmp_trajectory, traj_agent_idx, trajectory_fu
     return traj_agent_idx
 
 
-def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
+def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
                    trajs_moving_obstacles, scenario_visualization,
                    reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                    reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
@@ -364,6 +364,9 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, arterial, ca
         weightofpolicy,
         weightofdriver,
         weightofcyclist,
+        ideal_weight_cyclist, 
+        ideal_weight_driver, 
+        ideal_weight_policymaker,
         trajectories_full,
         moving_obstacles,
         state,
@@ -1234,7 +1237,7 @@ def balance_function(weights, ideal_weights=None):
     # Combine the two balance measures
     return distribution_balance * min_weight_ratio
 
-def evaluate_trajectories_for_reasons(weightofpolicy, weightofdriver, weightofcyclist, trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions,
+def evaluate_trajectories_for_reasons(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions,
                                       reasons_cyclist_comfort, reasons_driver_time_eff,
                                       reasons_policymaker_reg_compliance,
                                       time_elapsed_driver=0.0, time_passed_cyclist=0.0):
@@ -1370,7 +1373,7 @@ def evaluate_trajectories_for_reasons(weightofpolicy, weightofdriver, weightofcy
         print(f"Agent Weights: {agent_weights}")
 
         # Calculate balance function value
-        ideal_weights = [1/3, 1/3, 1/3]  # Cyclist, Driver, Policymaker
+        ideal_weights = [ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker]  # Cyclist, Driver, Policymaker
         # ideal_weights = [0.1, 0.1, 0.8]  # Cyclist, Driver, Policymaker -> more focus on policymaker
         balance_value = balance_function([agent_weights.get('cyclist', 0), agent_weights.get('driver', 0), agent_weights.get('policymaker', 0)],
                                          ideal_weights=ideal_weights)
@@ -2565,9 +2568,9 @@ class CyclistParameters:
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
 
-def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz,):
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz,):
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
 
     # Define paths
     script_dir = Path(__file__).resolve().parent
@@ -2610,6 +2613,13 @@ with st.container():
     weight_xxx = st.slider("xxx", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
     weight_yyy = st.slider("yyy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
     weight_zzz = st.slider("zzz", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
+with st.container():
+    st.subheader("ideal weight set")
+    ideal_weight_cyclist = st.slider("ideal_weight_cyclist", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+    ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
 
 # --- Parameter Inputs (new section) ---
 st.subheader("Simulation Parameters")
@@ -2674,6 +2684,16 @@ if st.button("Run Simulation"):
         yyy = round(weight_yyy / total2, 1)
         zzz = round(weight_zzz / total2, 1)
 
+    # Normalize ideal set
+    total3 = ideal_weight_cyclist + ideal_weight_driver + ideal_weight_policymaker
+    if total3 == 0:
+        ideal_weight_cyclist = ideal_weight_driver = ideal_weight_policymaker = round(1/3, 1)
+    else:
+        ideal_weight_cyclist = round(ideal_weight_cyclist / total3, 1)
+        ideal_weight_driver = round(ideal_weight_driver / total3, 1)
+        ideal_weight_policymaker = round(ideal_weight_policymaker / total3, 1)
+
+
     # Gather all parameters into a dictionary
     params_to_update = {
         'scenario_dt': scenario_dt,
@@ -2704,4 +2724,4 @@ if st.button("Run Simulation"):
     importlib.reload(lib.parameters)
     from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
 
-    run_simulation(norm_policy, norm_driver, norm_cyclist, xxx, yyy, zzz)
+    run_simulation(norm_policy, norm_driver, norm_cyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz)
