@@ -2501,7 +2501,7 @@ def save_vehicle_data(simulation, time_values, reasons_policymaker_values, reaso
     yaw_vehicle = simulation.history.yaw[:-1]
     x_ref_deviation_vehicle = simulation.history.xref_deviation[:-1]
 
-    save_folder = os.path.join("..", "results", "reasons_evaluation")
+    save_folder = os.path.join("main", "results", "reasons_evaluation")
     os.makedirs(save_folder, exist_ok=True)
 
     if supervision:
@@ -2658,13 +2658,22 @@ with st.expander("Expand to edit simulation parameters"):
     cyclist_speed = st.number_input("CYCLIST SPEED (km/h)", value=5 / 3.6, step=0.5)
     st.markdown("---")
 
+import streamlit.components.v1 as components
 
 if st.button("Run Simulation"):
     st.info("Running simulation...")
     
-    # Embed the YouTube video to play while the simulation runs
-    # You can change the video URL to any video you like.
-    st.video('https://www.youtube.com/watch?v=Wy3Xd-6m4wk')
+
+
+    # Replace the video with an embedded Dino game clone
+    dino_html = """
+    <iframe src="https://chromedino.com/" 
+            width="100%" height="500" 
+            style="border:none;">
+    </iframe>
+    """
+
+    components.html(dino_html, height=500)
 
     # Normalize 1st set
     total1 = weight_policy + weight_driver + weight_cyclist

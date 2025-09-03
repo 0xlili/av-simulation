@@ -5,7 +5,7 @@ from typing import Tuple, List, Optional
 
 import cvxpy
 import numpy as np
-
+sys.path.append("main")
 from lib.car_dimensions import CarDimensions
 from lib.simulation import State, Simulation
 from lib.trajectories import calc_nearest_index, calc_nearest_index_in_direction
