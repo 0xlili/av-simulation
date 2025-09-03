@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local modules
+sys.path.append('..')
 sys.path.append('main')
 
 from envs.arterial_multi_lanes import ArterialMultiLanes
@@ -2659,13 +2660,22 @@ with st.expander("Expand to edit simulation parameters"):
     cyclist_speed = st.number_input("CYCLIST SPEED (km/h)", value=5 / 3.6, step=0.5)
     st.markdown("---")
 
+import streamlit.components.v1 as components
 
 if st.button("Run Simulation"):
     st.info("Running simulation...")
     
-    # Embed the YouTube video to play while the simulation runs
-    # You can change the video URL to any video you like.
-    st.video('https://www.youtube.com/watch?v=Wy3Xd-6m4wk')
+
+
+    # Replace the video with an embedded Dino game clone
+    dino_html = """
+    <iframe src="https://chromedino.com/" 
+            width="100%" height="500" 
+            style="border:none;">
+    </iframe>
+    """
+
+    components.html(dino_html, height=500)
 
     # Normalize 1st set
     total1 = weight_policy + weight_driver + weight_cyclist
