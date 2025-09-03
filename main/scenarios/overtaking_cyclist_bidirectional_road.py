@@ -18,6 +18,8 @@ import numpy as np
 
 # Local modules
 sys.path.append('..')
+sys.path.append('main')
+
 from envs.arterial_multi_lanes import ArterialMultiLanes
 from lib.car_dimensions import CarDimensions, BicycleModelDimensions, BicycleRealDimensions
 from lib.collision_avoidance import get_cutoff_curve_by_position_idx, check_collision_moving_bicycle
