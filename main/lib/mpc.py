@@ -3,6 +3,7 @@ import math
 import sys
 from typing import Tuple, List, Optional
 
+
 import cvxpy
 import numpy as np
 
@@ -10,7 +11,21 @@ from lib.car_dimensions import CarDimensions
 from lib.simulation import State, Simulation
 from lib.trajectories import calc_nearest_index, calc_nearest_index_in_direction
 
-with open('../config/mpc_config.json', 'r') as f:
+# with open('../config/mpc_config.json', 'r') as f:
+#     config = json.load(f)
+
+import os
+import json
+from pathlib import Path
+
+# Get the path to the directory where this script is located
+script_dir = Path(__file__).parent
+
+# Construct the path to mpc_config.json
+# It's two directories up, then into the config folder
+config_file_path = script_dir.parent.joinpath('config', 'mpc_config.json')
+
+with open(config_file_path, 'r') as f:
     config = json.load(f)
 
 # Extract parameters from config
