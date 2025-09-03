@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local modules
-sys.path.append('..')
-from envs.arterial_multi_lanes import ArterialMultiLanes
-from lib.car_dimensions import CarDimensions, BicycleModelDimensions, BicycleRealDimensions
+sys.path.append('../..')
+from main.envs.arterial_multi_lanes import ArterialMultiLanes
+from main.lib.car_dimensions import CarDimensions, BicycleModelDimensions, BicycleRealDimensions
 from lib.collision_avoidance import get_cutoff_curve_by_position_idx, check_collision_moving_bicycle
 from lib.motion_primitive import load_motion_primitives
 from lib.mp_search_reasoning import MotionPrimitiveSearch
