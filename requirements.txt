@@ -10,8 +10,8 @@ Jinja2==3.1.6
 joblib==1.5.1
 kiwisolver==1.4.7
 MarkupSafe==3.0.2
-matplotlib==3.6.2
-numpy==1.16
+matplotlib==3.8.4
+numpy==1.26.4
 osqp==1.0.4
 packaging==25.0
 pillow==11.3.0
@@ -22,5 +22,6 @@ scipy==1.13.1
 scs==3.2.7.post2
 six==1.17.0
 zipp==3.23.0
+
 
 
