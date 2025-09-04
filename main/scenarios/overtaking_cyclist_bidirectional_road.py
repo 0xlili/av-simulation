@@ -2614,11 +2614,12 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             input_images_path = results_folder / "frame_%04d.jpg"
             output_video_path = results_folder / "output_video.mp4"
             
+
             subprocess.run([
                 'ffmpeg', '-y', '-framerate', '10', '-i', str(input_images_path),
-                '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(output_video_path)
+                '-s', '1280x720',  # Example: downscale to 720p
+                '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '28', str(output_video_path)
             ])
-            
             # Display the video in Streamlit
             if output_video_path.exists():
                 st.video(str(output_video_path))
