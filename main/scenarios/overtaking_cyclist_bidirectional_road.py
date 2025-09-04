@@ -2576,8 +2576,8 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
 
     # Define paths
     script_dir = Path(__file__).resolve().parent
-    results_folder = script_dir.parent / "results" / "reasons_evaluation"
-    scenarios_folder = script_dir.parent / "scenarios"
+    results_folder = script_dir.parent / ".." / "results" / "reasons_evaluation"
+    scenarios_folder = script_dir.parent
 
     # Change to results folder
     os.chdir(results_folder)
