@@ -391,7 +391,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
         visualize_trajectory_evaluations(
             eval_results, trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions, scenario_visualization, time_values,
             reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, agent_weights,
-            save_path=os.path.join("..", "results", "reasons_evaluation", "trajectory_evaluations.png")
+            save_path=os.path.join("results", "reasons_evaluation", "trajectory_evaluations.png")
         )
 
     # Use the best trajectory
