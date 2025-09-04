@@ -2676,6 +2676,8 @@ if st.button("Run Simulation"):
     """
 
     components.html(dino_html, height=500)
+    ignoree = Path(__file__).resolve().parent
+    print(ignoree)
 
     # Normalize 1st set
     total1 = weight_policy + weight_driver + weight_cyclist
