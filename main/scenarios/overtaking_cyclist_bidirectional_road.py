@@ -2574,46 +2574,34 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     # Run the simulation
     main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
 
-    # Define paths
-    # script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # results_folder = os.path.join(script_dir, "..", "..", "results", "reasons_evaluation")
-    # scenarios_folder = os.path.join(script_dir, "..", "..", "scenarios")
-
-    from pathlib import Path
-
     # Use pathlib to get the directory of the current file
     script_dir = Path(__file__).parent
     
-    # Now you can use the .parent method to go up directories
-    grandparent_dir = script_dir.parent
+    # Correctly go up TWO levels to the root of the repo
+    grandparent_dir = script_dir.parent.parent 
     results_folder = grandparent_dir / "results" / "reasons_evaluation"
-    scenarios_folder = grandparent_dir / "scenarios"
-    # # Assuming script_dir is a Path object
-    # # Go up one level to the parent, then another level to the grandparent
-    # grandparent_dir = script_dir.parent.parent
-    # results_folder = grandparent_dir / "results" / "reasons_evaluation"
-    # scenarios_folder = grandparent_dir / "scenarios"
 
-
-    # Change to results folder
-    os.chdir(results_folder)
-    st.info(f"Changed directory to: {results_folder}")
+    # --- REMOVE: os.chdir() call is no longer needed ---
+    st.info(f"Using results directory: {results_folder}")
 
     # Generate output video using ffmpeg
+    # Use the full path for the input images and output video
+    input_images_path = results_folder / "frame_%04d.jpg"
+    output_video_path = results_folder / "output_video.mp4"
+    
     subprocess.run([
-        'ffmpeg', '-y', '-framerate', '10', '-i', 'frame_%04d.jpg',
-        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', 'output_video.mp4'
+        'ffmpeg', '-y', '-framerate', '10', '-i', str(input_images_path),
+        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(output_video_path)
     ])
 
     # Display the video in Streamlit
-    video_path = results_folder / "output_video.mp4"
-    if video_path.exists():
-        video_bytes = video_path.read_bytes()
+    if output_video_path.exists():
+        video_bytes = output_video_path.read_bytes()
         st.video(video_bytes)
     else:
         st.error("Video generation failed. Make sure the simulation produced frames.")
-    os.chdir(scenarios_folder)
+    
+    # --- REMOVE: os.chdir() call is no longer needed ---
 
 
 # Streamlit interface
@@ -2682,8 +2670,6 @@ import streamlit.components.v1 as components
 if st.button("Run Simulation"):
     st.info("Running simulation...")
     
-
-
     # Replace the video with an embedded Dino game clone
     dino_html = """
     <iframe src="https://chromedino.com/" 
@@ -2746,10 +2732,6 @@ if st.button("Run Simulation"):
     update_parameters_file(params_to_update)
     st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
     
-
-
-    # Change to main/scenarios to reset path before running simulation
-    # os.chdir(Path(__file__).resolve().parent)
     import lib.parameters
     importlib.reload(lib.parameters)
     from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
