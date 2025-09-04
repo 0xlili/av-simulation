@@ -2624,7 +2624,9 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
                 st.video(str(output_video_path))
             else:
                 st.error("Video generation failed. Make sure the simulation produced frames.")
-
+    except FileNotFoundError:
+        st.error(f"The directory itself does not exist: {results_folder}")
+    # --- END OF DIAGNOSTIC BLOCK ---
 
 
 
