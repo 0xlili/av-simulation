@@ -2569,39 +2569,60 @@ class CyclistParameters:
 """
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
-
 def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz,):
-    # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
-
     # Use pathlib to get the directory of the current file
     script_dir = Path(__file__).parent
     
     # Correctly go up TWO levels to the root of the repo
-    grandparent_dir = script_dir.parent.parent 
+    grandparent_dir = script_dir.parent.parent
     results_folder = grandparent_dir / "results" / "reasons_evaluation"
 
-    # --- REMOVE: os.chdir() call is no longer needed ---
+    # --- THIS LINE IS CRITICAL ---
+    # Create the results directory if it does not exist
+    results_folder.mkdir(parents=True, exist_ok=True)
+    
     st.info(f"Using results directory: {results_folder}")
 
-    # Generate output video using ffmpeg
-    # Use the full path for the input images and output video
-    input_images_path = results_folder / "frame_%04d.jpg"
-    output_video_path = results_folder / "output_video.mp4"
+    # --- Fix for the main() function's missing path handling ---
+    # This is the most likely cause of your problem.
+    # The 'main' function must be told where to save the files.
+    # If your main() function accepts a path, pass results_folder to it.
+    # e.g., main(..., save_path=results_folder)
+    # If not, you must fix the code inside main() to use this folder.
     
-    subprocess.run([
-        'ffmpeg', '-y', '-framerate', '10', '-i', str(input_images_path),
-        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(output_video_path)
-    ])
-
-    # Display the video in Streamlit
-    if output_video_path.exists():
-        video_bytes = output_video_path.read_bytes()
-        st.video(video_bytes)
-    else:
-        st.error("Video generation failed. Make sure the simulation produced frames.")
+    # Run the simulation
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
     
-    # --- REMOVE: os.chdir() call is no longer needed ---
+    # --- START OF DIAGNOSTIC BLOCK ---
+    st.info("Checking for generated frames...")
+    try:
+        files_in_dir = os.listdir(results_folder)
+        frames_found = [f for f in files_in_dir if f.startswith('frame_')]
+        
+        if not frames_found:
+            st.error(f"FAILURE: No files starting with 'frame_' were found in: {results_folder}")
+            st.info(f"Files found in directory: {files_in_dir}")
+        else:
+            st.success(f"SUCCESS: Found {len(frames_found)} frames in the directory. Proceeding with video generation.")
+            # Only proceed with ffmpeg if files were found
+            # Generate output video using ffmpeg
+            input_images_path = results_folder / "frame_%04d.jpg"
+            output_video_path = results_folder / "output_video.mp4"
+            
+            subprocess.run([
+                'ffmpeg', '-y', '-framerate', '10', '-i', str(input_images_path),
+                '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(output_video_path)
+            ])
+            
+            # Display the video in Streamlit
+            if output_video_path.exists():
+                video_bytes = output_video_path.read_bytes()
+                st.video(video_bytes)
+            else:
+                st.error("Video generation failed. Make sure the simulation produced frames.")
+    except FileNotFoundError:
+        st.error(f"The directory itself does not exist: {results_folder}")
+    # --- END OF DIAGNOSTIC BLOCK ---
 
 
 # Streamlit interface
