@@ -2575,9 +2575,17 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
 
     # Define paths
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    results_folder = os.path.join(script_dir, "..", "..", "results", "reasons_evaluation")
-    scenarios_folder = os.path.join(script_dir, "..", "..", "scenarios")
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # results_folder = os.path.join(script_dir, "..", "..", "results", "reasons_evaluation")
+    # scenarios_folder = os.path.join(script_dir, "..", "..", "scenarios")
+
+    from pathlib import Path
+
+    # Assuming script_dir is a Path object
+    # Go up one level to the parent, then another level to the grandparent
+    grandparent_dir = script_dir.parent.parent
+    results_folder = grandparent_dir / "results" / "reasons_evaluation"
+    scenarios_folder = grandparent_dir / "scenarios"
 
 
     # Change to results folder
