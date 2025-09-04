@@ -2621,13 +2621,13 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             
             # Display the video in Streamlit
             if output_video_path.exists():
-                video_bytes = output_video_path.read_bytes()
-                st.video(video_bytes)
+                st.video(str(output_video_path))
             else:
                 st.error("Video generation failed. Make sure the simulation produced frames.")
-    except FileNotFoundError:
-        st.error(f"The directory itself does not exist: {results_folder}")
-    # --- END OF DIAGNOSTIC BLOCK ---
+            except FileNotFoundError:
+                st.error(f"The directory itself does not exist: {results_folder}")
+            # ... after the subprocess.run() call
+
 
 
 # Streamlit interface
