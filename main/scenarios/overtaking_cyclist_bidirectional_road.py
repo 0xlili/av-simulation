@@ -17,9 +17,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Local modules
-sys.path.append('../..')
-from main.envs.arterial_multi_lanes import ArterialMultiLanes
-from main.lib.car_dimensions import CarDimensions, BicycleModelDimensions, BicycleRealDimensions
+sys.path.append('..')
+sys.path.append('main')
+
+from envs.arterial_multi_lanes import ArterialMultiLanes
+from lib.car_dimensions import CarDimensions, BicycleModelDimensions, BicycleRealDimensions
 from lib.collision_avoidance import get_cutoff_curve_by_position_idx, check_collision_moving_bicycle
 from lib.motion_primitive import load_motion_primitives
 from lib.mp_search_reasoning import MotionPrimitiveSearch
@@ -38,12 +40,13 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False, save_path=None) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
     Args:
         replanner (bool): If True, enables replanner mode for the simulation.
+        save_path (Path): The Path object for the directory to save frames and results.
     """
 
     # Initialization
@@ -63,17 +66,20 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
     # A variable that saves information whether a reason has already triggered a replan
     replan_tracker = False
 
-    # Prepare folder to save the results
-    # Define the folder path
-    save_folder = os.path.join("..", "results", "reasons_evaluation")
-
+    # The save folder is now passed as an argument.
+    # We no longer need to define it here using relative paths.
+    
+    # Check if a save path was provided
+    if save_path is None:
+        raise ValueError("A save path must be provided to the main function.")
+    
     # Ensure the folder exists (create it if it doesn't)
-    os.makedirs(save_folder, exist_ok=True)
+    # This is handled in the run_simulation function, but it's good practice to have it here too
+    save_path.mkdir(parents=True, exist_ok=True)
 
-    # Delete all existing .jpg files in the folder
-    for file in os.listdir(save_folder):
-        if file.endswith(".jpg"):
-            os.remove(os.path.join(save_folder, file))
+    # Delete all existing .jpg files in the folder using the passed-in Path object
+    for file in save_path.glob("*.jpg"):
+        os.remove(file)
 
     # Initialize simulation
     mps, car_dimensions, bicycle_dimensions, arterial, scenario_no_obstacles, scenario_visualization, moving_obstacles = initialize_simulation()
@@ -121,7 +127,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
         # Predict the movement of each moving obstacle, and retrieve the predicted trajectories
         trajs_moving_obstacles = [
             np.vstack(MovingObstaclesPrediction(*o.get(), sample_time=ScenarioParameters.DT, car_dimensions=bicycle_dimensions)
-                      .state_prediction(MPCParameters.TIME_HORIZON)).T
+                     .state_prediction(MPCParameters.TIME_HORIZON)).T
             for o in moving_obstacles]
 
         # Evaluate reasons
@@ -140,7 +146,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
 
             # Evaluate reasons and determine if a replan is needed, replan_tracker is used to prevent multiple replans
             replan_needed, replan_tracker = reasons_evaluation(reasons_cyclist_comfort, reasons_driver_time_eff,
-                                               reasons_policymaker_reg_compliance, replan_needed, replan_tracker)
+                                                 reasons_policymaker_reg_compliance, replan_needed, replan_tracker)
 
             # Execute replan only if reasons value drop below ScenarioParameters.REASONS_THRESHOLD was detected
             if replan_needed:
@@ -148,18 +154,18 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
                 IS_FOLLOWING = False
                 # change max_speed of the MPC to 30/3.6
                 collision_xy, mpc, traj_agent_idx, trajectory_full, scenario_obstacles = perform_replan(
-                            weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
-                            trajs_moving_obstacles, scenario_visualization,
-                            reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
-                            reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                            time_values, xxx=xxx, yyy=yyy, zzz=zzz,
-                            max_speed=MPCParameters.MAX_SPEED_FREEWAY,
-                            is_following=IS_FOLLOWING,
-                            vis_frame=vis_frame,
-                            save_weight_table=save_weight_table,
-                            time_elapsed_driver=TIME_ELAPSED_DRIVER,
-                            time_passed_cyclist=TIME_PASSED_CYCLIST
-                        )
+                                 weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, arterial, car_dimensions, bicycle_dimensions, dl, moving_obstacles, mps, state,
+                                 trajs_moving_obstacles, scenario_visualization,
+                                 reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
+                                 reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
+                                 time_values, xxx=xxx, yyy=yyy, zzz=zzz,
+                                 max_speed=MPCParameters.MAX_SPEED_FREEWAY,
+                                 is_following=IS_FOLLOWING,
+                                 vis_frame=vis_frame,
+                                 save_weight_table=save_weight_table,
+                                 time_elapsed_driver=TIME_ELAPSED_DRIVER,
+                                 time_passed_cyclist=TIME_PASSED_CYCLIST
+                             )
                 scenario = scenario_obstacles
 
         # Cut off the trajectory before a collision occurs, with an additional margin
@@ -183,13 +189,14 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
         xref_deviation_value = mpc.get_current_xref_deviation()
         # show the computation results
         if vis_frame == True:
+            # CRITICAL: Pass the save_path variable to visualize_frame()
             visualize_frame(ScenarioParameters.DT, car_dimensions, bicycle_dimensions, collision_xy, i, moving_obstacles, mpc,
-                            scenario_visualization, simulation,
-                            state, tmp_trajectory, trajectory_res,
-                            reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, distance_values,
-                            reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
-                            speed_values, time_values, xref_deviation_values, xref_deviation_value,
-                            static_x_axis=True, max_time=15) # static_x_axis=False)
+                              scenario_visualization, simulation,
+                              state, tmp_trajectory, trajectory_res,
+                              reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, distance_values,
+                              reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
+                              speed_values, time_values, xref_deviation_values, xref_deviation_value,
+                              static_x_axis=True, max_time=15, save_path=save_path)
 
 
         # Move all obstacles one step ahead
@@ -204,9 +211,9 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
     end_time = time.time()
     loops_total_runtime = sum(loop_runtimes)
     total_runtime = end_time - start_time
-    logger.info('total loops run time is: {}'.format(loops_total_runtime))
-    logger.info('total run time is: {}'.format(total_runtime))
-    logger.info('each mpc runtime is: {}'.format(loops_total_runtime / len(loop_runtimes)))
+    # logger.info('total loops run time is: {}'.format(loops_total_runtime))
+    # logger.info('total run time is: {}'.format(total_runtime))
+    # logger.info('each mpc runtime is: {}'.format(loops_total_runtime / len(loop_runtimes)))
 
     # Visualize final
     visualize_final(simulation.history)
@@ -384,7 +391,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
         visualize_trajectory_evaluations(
             eval_results, trajectories_full, moving_obstacles, state, car_dimensions, bicycle_dimensions, scenario_visualization, time_values,
             reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, agent_weights,
-            save_path=os.path.join("..", "results", "reasons_evaluation", "trajectory_evaluations.png")
+            save_path=os.path.join("results", "reasons_evaluation", "trajectory_evaluations.png")
         )
 
     # Use the best trajectory
@@ -2420,19 +2427,18 @@ def visualize_frame(dt, car_dimensions, bicycle_dimensions, collision_xy, i, mov
                     scenario, simulation, state, tmp_trajectory, trajectory_res,
                     reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, distance_values,
                     reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance, speed_values, time_values,  xref_deviation_values, xref_deviation_value,
-                    static_x_axis=True, max_time=20):
+                    static_x_axis=True, max_time=20, save_path=None): # ADDED: save_path parameter
     """
     Visualize the simulation frame with an option for static or dynamic x-axis.
 
     Parameters:
         static_x_axis (bool): If True, the x-axis is fixed to `max_time`. If False, the x-axis dynamically adjusts.
         max_time (float): Maximum time for the x-axis when `static_x_axis` is True.
+        save_path (Path): The Path object for the directory to save the frame.
     """
-    # Define the folder path
-    save_folder = os.path.join("..", "results", "reasons_evaluation")
-
-    # Ensure the folder exists (create it if it doesn't)
-    os.makedirs(save_folder, exist_ok=True)
+    # The directory is now passed in as the 'save_path' argument.
+    # The os.path.join and os.makedirs calls here are no longer needed, as they
+    # are handled by the run_simulation function.
 
     if i >= 0:
         # Create figure and grid layout (2 rows, 2 columns)
@@ -2482,9 +2488,10 @@ def visualize_frame(dt, car_dimensions, bicycle_dimensions, collision_xy, i, mov
         # Adjust layout and show the plot
         plt.tight_layout()
 
-        # Save the figure to the specified folder
-        save_path = os.path.join(save_folder, f"frame_{i:04d}.jpg")
-        plt.savefig(save_path, format='jpg', dpi=300)
+        # CRITICAL CHANGE: Use the save_path argument to save the frame
+        if save_path:
+            full_save_path = save_path / f"frame_{i:04d}.jpg"
+            plt.savefig(full_save_path, format='jpg', dpi=300)
 
         # plt.pause(0.001)
         plt.close()
@@ -2501,7 +2508,7 @@ def save_vehicle_data(simulation, time_values, reasons_policymaker_values, reaso
     yaw_vehicle = simulation.history.yaw[:-1]
     x_ref_deviation_vehicle = simulation.history.xref_deviation[:-1]
 
-    save_folder = os.path.join("..", "results", "reasons_evaluation")
+    save_folder = os.path.join("main", "results", "reasons_evaluation")
     os.makedirs(save_folder, exist_ok=True)
 
     if supervision:
@@ -2567,34 +2574,59 @@ class CyclistParameters:
 """
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
-
 def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz,):
+    # Use pathlib to get the directory of the current file
+    script_dir = Path(__file__).parent
+    
+    # Correctly go up TWO levels to the root of the repo
+    grandparent_dir = script_dir.parent.parent
+    results_folder = grandparent_dir / "results" / "reasons_evaluation"
+
+    # --- THIS LINE IS CRITICAL ---
+    # Create the results directory if it does not exist
+    results_folder.mkdir(parents=True, exist_ok=True)
+    
+    st.info(f"Using results directory: {results_folder}")
+
+    # --- Fix for the main() function's missing path handling ---
+    # This is the most likely cause of your problem.
+    # The 'main' function must be told where to save the files.
+    # If your main() function accepts a path, pass results_folder to it.
+    # e.g., main(..., save_path=results_folder)
+    # If not, you must fix the code inside main() to use this folder.
+    
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False)
-
-    # Define paths
-    script_dir = Path(__file__).resolve().parent
-    results_folder = script_dir.parent / "results" / "reasons_evaluation"
-    scenarios_folder = script_dir.parent / "scenarios"
-
-    # Change to results folder
-    os.chdir(results_folder)
-    st.info(f"Changed directory to: {results_folder}")
-
-    # Generate output video using ffmpeg
-    subprocess.run([
-        'ffmpeg', '-y', '-framerate', '10', '-i', 'frame_%04d.jpg',
-        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', 'output_video.mp4'
-    ])
-
-    # Display the video in Streamlit
-    video_path = results_folder / "output_video.mp4"
-    if video_path.exists():
-        video_bytes = video_path.read_bytes()
-        st.video(video_bytes)
-    else:
-        st.error("Video generation failed. Make sure the simulation produced frames.")
-    os.chdir(scenarios_folder)
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False, save_path=results_folder)
+    
+    # --- START OF DIAGNOSTIC BLOCK ---
+    st.info("Checking for generated frames...")
+    try:
+        files_in_dir = os.listdir(results_folder)
+        frames_found = [f for f in files_in_dir if f.startswith('frame_')]
+        
+        if not frames_found:
+            st.error(f"FAILURE: No files starting with 'frame_' were found in: {results_folder}")
+            st.info(f"Files found in directory: {files_in_dir}")
+        else:
+            st.success(f"SUCCESS: Found {len(frames_found)} frames in the directory. Proceeding with video generation.")
+            # Only proceed with ffmpeg if files were found
+            # Generate output video using ffmpeg
+            input_images_path = results_folder / "frame_%04d.jpg"
+            output_video_path = results_folder / "output_video.mp4"
+            
+            subprocess.run([
+                'ffmpeg', '-y', '-framerate', '10', '-i', str(input_images_path),
+                '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(output_video_path)
+            ])
+            
+            # Display the video in Streamlit
+            if output_video_path.exists():
+                st.video(str(output_video_path))
+            else:
+                st.error("Video generation failed. Make sure the simulation produced frames.")
+    except FileNotFoundError:
+        st.error(f"The directory itself does not exist: {results_folder}")
+    # --- END OF DIAGNOSTIC BLOCK ---
 
 
 # Streamlit interface
@@ -2658,13 +2690,22 @@ with st.expander("Expand to edit simulation parameters"):
     cyclist_speed = st.number_input("CYCLIST SPEED (km/h)", value=5 / 3.6, step=0.5)
     st.markdown("---")
 
+import streamlit.components.v1 as components
 
 if st.button("Run Simulation"):
     st.info("Running simulation...")
     
-    # Embed the YouTube video to play while the simulation runs
-    # You can change the video URL to any video you like.
-    st.video('https://www.youtube.com/watch?v=Wy3Xd-6m4wk')
+    # Replace the video with an embedded Dino game clone
+    dino_html = """
+    <iframe src="https://chromedino.com/" 
+            width="100%" height="500" 
+            style="border:none;">
+    </iframe>
+    """
+
+    components.html(dino_html, height=500)
+    ignoree = Path(__file__).resolve().parent
+    print(ignoree)
 
     # Normalize 1st set
     total1 = weight_policy + weight_driver + weight_cyclist
@@ -2716,10 +2757,6 @@ if st.button("Run Simulation"):
     update_parameters_file(params_to_update)
     st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
     
-
-
-    # Change to main/scenarios to reset path before running simulation
-    os.chdir(Path(__file__).resolve().parent)
     import lib.parameters
     importlib.reload(lib.parameters)
     from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
