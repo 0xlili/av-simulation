@@ -2628,14 +2628,8 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
         st.error(f"The directory itself does not exist: {results_folder}")
     # --- END OF DIAGNOSTIC BLOCK ---
 
-
-
-
-
-# Streamlit interface
-st.title("Overtaking Cyclist Bidirectional Road Simulation")
-
 # --- 1st weight set ---
+st.title("Overtaking Cyclist Bidirectional Road Simulation")
 with st.container():
     st.subheader("1st weight set")
     weight_policy = st.slider("Weight of Policy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
