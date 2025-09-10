@@ -2662,10 +2662,10 @@ with st.expander("Expand to edit simulation parameters"):
     zzz3 = st.number_input("zzz3", value=0.34, step=0.01)
 
     with st.container():
-    st.subheader("ideal weight set")
-    ideal_weight_cyclist = st.slider("ideal_weight_cyclist", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+        st.subheader("ideal weight set")
+        ideal_weight_cyclist = st.slider("ideal_weight_cyclist", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+        ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+        ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
 
 import streamlit.components.v1 as components
 
