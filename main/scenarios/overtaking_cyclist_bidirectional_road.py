@@ -2570,7 +2570,7 @@ class CyclistParameters:
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
 
-def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz,):
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3):
     # Run the simulation
     main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False)
 
@@ -2733,4 +2733,4 @@ if st.button("Run Simulation"):
     importlib.reload(lib.parameters)
     from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
 
-    run_simulation(norm_policy, norm_driver, norm_cyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz1, zzz2, zzz3)
+    run_simulation(norm_policy, norm_driver, norm_cyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3)
