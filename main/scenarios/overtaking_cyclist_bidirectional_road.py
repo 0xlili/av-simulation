@@ -40,7 +40,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False, save_path=None) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False, save_path=None) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
@@ -86,7 +86,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
 
     # Run motion primitive search
     cost, path, trajectory_full, search_runtime = run_motion_primitive_search(scenario_no_obstacles, car_dimensions,
-                                                                              mps,xxx=xxx, yyy=yyy, zzz=zzz)
+                                                                              mps,xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3)
 
     # Initialize MPC, set max speed to cyclist speed if the AV is following the cyclist
     if IS_FOLLOWING == True:
@@ -158,7 +158,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
                                  trajs_moving_obstacles, scenario_visualization,
                                  reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                                  reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                                 time_values, xxx=xxx, yyy=yyy, zzz=zzz,
+                                 time_values, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3,
                                  max_speed=MPCParameters.MAX_SPEED_FREEWAY,
                                  is_following=IS_FOLLOWING,
                                  vis_frame=vis_frame,
@@ -299,7 +299,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
                    trajs_moving_obstacles, scenario_visualization,
                    reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                    reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                   time_values, max_speed, xxx, yyy, zzz,
+                   time_values, max_speed, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3,
                    is_following=True, vis_frame=False, save_weight_table=False, time_elapsed_driver=0.0, time_passed_cyclist=0.0):
     """
     Perform a replan based on the current state and moving obstacles.
@@ -335,7 +335,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     logger.info(f"Initial position: {scenario_obstacles.start}")
 
     # Perform motion primitive search
-    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, xxx=xxx, yyy=yyy, zzz=zzz, margin=car_dimensions.radius,
+    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius,
                                    moving_obstacles_state=bicycle_state,
                                     driver_elapsed_time=time_elapsed_driver,
                                     cyclist_elapsed_time=time_passed_cyclist
@@ -1953,7 +1953,7 @@ def reasons_evaluation(reasons_cyclist_comfort, reasons_driver_time_eff, reasons
     return replan_needed, replan_tracker
 
 
-def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx, yyy, zzz) -> tuple:
+def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3) -> tuple:
     """
     Run the motion primitive search algorithm.
 
@@ -1966,7 +1966,7 @@ def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx,
         tuple: A tuple containing the cost, path, and trajectory.
     """
     start_time = time.time()
-    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx=xxx, yyy=yyy, zzz=zzz, margin=car_dimensions.radius)
+    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3 margin=car_dimensions.radius)
     cost, path, trajectory_full = search.run(debug=True)
     logger.info("Search finished")
     plot_motion_primitives(search, scenario_no_obstacles, path, car_dimensions)
@@ -2574,7 +2574,7 @@ class CyclistParameters:
 """
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
-def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz,):
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3):
     # Use pathlib to get the directory of the current file
     script_dir = Path(__file__).parent
     
@@ -2596,7 +2596,7 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     # If not, you must fix the code inside main() to use this folder.
     
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz, replanner=True, vis_frame=True, save_weight_table=False, save_path=results_folder)
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False, save_path=results_folder)
     
     # --- START OF DIAGNOSTIC BLOCK ---
     st.info("Checking for generated frames...")
@@ -2644,15 +2644,17 @@ with st.container():
 # --- 2nd weight set ---
 with st.container():
     st.subheader("2nd weight set")
-    weight_xxx = st.slider("xxx", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    weight_yyy = st.slider("yyy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    weight_zzz = st.slider("zzz", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+    xxx1 = st.slider("xxx1", value=0.40, step=0.01)
+    xxx2 = st.slider("xxx2", value=0.50, step=0.01)
+    xxx3 = st.slider("xxx3", value=0.50, step=0.01)
+    yyy1 = st.slider("yyy1", value=0.40, step=0.01)
+    yyy2 = st.slider("yyy2", value=0.50, step=0.01)
+    yyy3 = st.slider("yyy3", value=0.00, step=0.01)
+    zzz1 = st.slider("zzz1", value=0.20, step=0.01)
+    zzz2 = st.slider("zzz2", value=0.00, step=0.01)
+    zzz3 = st.slider("zzz3", value=0.50, step=0.01)
 
-with st.container():
-    st.subheader("ideal weight set")
-    ideal_weight_cyclist = st.slider("ideal_weight_cyclist", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
 
 
 # --- Parameter Inputs (new section) ---
@@ -2692,6 +2694,12 @@ with st.expander("Expand to edit simulation parameters"):
     cyclist_speed = st.number_input("CYCLIST SPEED (km/h)", value=5 / 3.6, step=0.5)
     st.markdown("---")
 
+    with st.container():
+        st.subheader("ideal weight set")
+        ideal_weight_cyclist = st.slider("ideal_weight_cyclist", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+        ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
+        ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+
 import streamlit.components.v1 as components
 
 if st.button("Run Simulation"):
@@ -2718,14 +2726,14 @@ if st.button("Run Simulation"):
         norm_driver = round(weight_driver / total1, 1)
         norm_cyclist = round(weight_cyclist / total1, 1)
 
-    # Normalize 2nd set
-    total2 = weight_xxx + weight_yyy + weight_zzz
-    if total2 == 0:
-        xxx = yyy = zzz = round(1/3, 1)
-    else:
-        xxx = round(weight_xxx / total2, 1)
-        yyy = round(weight_yyy / total2, 1)
-        zzz = round(weight_zzz / total2, 1)
+    # # Normalize 2nd set
+    # total2 = weight_xxx + weight_yyy + weight_zzz
+    # if total2 == 0:
+    #     xxx = yyy = zzz = round(1/3, 1)
+    # else:
+    #     xxx = round(weight_xxx / total2, 1)
+    #     yyy = round(weight_yyy / total2, 1)
+    #     zzz = round(weight_zzz / total2, 1)
 
     # Normalize ideal set
     total3 = ideal_weight_cyclist + ideal_weight_driver + ideal_weight_policymaker
@@ -2763,4 +2771,4 @@ if st.button("Run Simulation"):
     importlib.reload(lib.parameters)
     from lib.parameters import CyclistParameters, DriverParameters, ScenarioParameters, MPCParameters, ReasonParameters
 
-    run_simulation(norm_policy, norm_driver, norm_cyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx, yyy, zzz)
+    run_simulation(norm_policy, norm_driver, norm_cyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3)
