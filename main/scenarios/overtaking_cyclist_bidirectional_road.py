@@ -40,7 +40,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2,, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy, zzz, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
