@@ -1966,7 +1966,7 @@ def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx1
         tuple: A tuple containing the cost, path, and trajectory.
     """
     start_time = time.time()
-    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3 margin=car_dimensions.radius)
+    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius)
     cost, path, trajectory_full = search.run(debug=True)
     logger.info("Search finished")
     plot_motion_primitives(search, scenario_no_obstacles, path, car_dimensions)
