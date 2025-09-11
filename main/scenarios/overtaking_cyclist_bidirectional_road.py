@@ -2649,10 +2649,14 @@ print(d_output_video_path)
 d_trajectory_evaluation_spatial = d_results_folder / "d_trajectory_evaluation_spatial.png"
 d_trajectory_evaluations_trajectories = d_results_folder / "d_trajectory_evaluation_trajectries.png"
 
+video_path = "d_output_video.mp4"
+spatial_image_path = "d_trajectory_evaluation_spatial.png"
+trajectory_image_path = "d_trajectory_evaluations_trajectories.png"
+
 # --- Default Outputs ---
-st.video('d_output_video.mp4')
-st.image('d_trajectory_evaluation_spatial.png', caption="Spatial Trajectory Evaluation")
-st.image('d_trajectory_evaluations_trajectories.png', caption="Trajectory Evaluation")
+st.video(video_path)
+st.image(spatial_image_path, caption="Spatial Trajectory Evaluation")
+st.image(trajectory_image_path, caption="Trajectory Evaluation")
 
 # --- 1st weight set ---
 with st.container():
