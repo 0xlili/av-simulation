@@ -2613,6 +2613,8 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             # Generate output video using ffmpeg
             input_images_path = results_folder / "frame_%04d.jpg"
             output_video_path = results_folder / "output_video.mp4"
+            trajectory_evaluation_spatial = results_folder / "trajectory_evaluation_spatial.png"
+            trajectory_evaluations_trajectories = results_folder / "trajectory_evaluation_trajectries.png"
             
 
             subprocess.run([
@@ -2623,6 +2625,11 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             # Display the video in Streamlit
             if output_video_path.exists():
                 st.video(str(output_video_path))
+
+
+                st.image(str(trajectory_evaluation_spatial), caption="Spatial Trajectory Evaluation")
+                st.image(str(trajectory_evaluations_trajectories), caption="Trajectory Evaluation")
+
             else:
                 st.error("Video generation failed. Make sure the simulation produced frames.")
     except FileNotFoundError:
@@ -2633,6 +2640,18 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
 
 # Streamlit interface
 st.title("Overtaking Cyclist Bidirectional Road Simulation")
+
+script_dir = Path(__file__).parent
+grandparent_dir = script_dir.parent.parent
+results_folder = grandparent_dir / "results" / "reasons_evaluation"
+d_output_video_path = results_folder / "d_output_video.mp4"
+d_trajectory_evaluation_spatial = results_folder / "d_trajectory_evaluation_spatial.png"
+d_trajectory_evaluations_trajectories = results_folder / "d_trajectory_evaluation_trajectries.png"
+
+# --- Default Outputs ---
+st.video(str(d_output_video_path))
+st.image(str(d_trajectory_evaluation_spatial), caption="Spatial Trajectory Evaluation")
+st.image(str(d_trajectory_evaluations_trajectories), caption="Trajectory Evaluation")
 
 # --- 1st weight set ---
 with st.container():
