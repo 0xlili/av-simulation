@@ -2651,7 +2651,7 @@ d_trajectory_evaluations_trajectories = d_results_folder / "d_trajectory_evaluat
 
 
 video_path = os.path.join(script_dir, "d_output_video.mp4")
-spatial_image_path = os.path.join(script_dir, "d_trajectory_evaluation_spatial.png")
+spatial_image_path = os.path.join(script_dir, "d_trajectory_evaluations_spatial.png")
 trajectory_image_path = os.path.join(script_dir, "d_trajectory_evaluations_trajectories.png")
 
 # --- Default Outputs ---
