@@ -2650,7 +2650,7 @@ d_trajectory_evaluation_spatial = d_results_folder / "d_trajectory_evaluation_sp
 d_trajectory_evaluations_trajectories = d_results_folder / "d_trajectory_evaluation_trajectries.png"
 
 # --- Default Outputs ---
-st.video('d_output_video_path.mp4')
+st.video('d_output_video.mp4')
 st.image('d_trajectory_evaluation_spatial.png', caption="Spatial Trajectory Evaluation")
 st.image('d_trajectory_evaluations_trajectories.png', caption="Trajectory Evaluation")
 
