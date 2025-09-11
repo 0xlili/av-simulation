@@ -2645,6 +2645,7 @@ script_dir = Path(__file__).parent
 grandparent_dir = script_dir.parent.parent
 d_results_folder = grandparent_dir / "results" 
 d_output_video_path = d_results_folder / "d_output_video.mp4"
+print("d_output_video_path")
 d_trajectory_evaluation_spatial = d_results_folder / "d_trajectory_evaluation_spatial.png"
 d_trajectory_evaluations_trajectories = d_results_folder / "d_trajectory_evaluation_trajectries.png"
 
