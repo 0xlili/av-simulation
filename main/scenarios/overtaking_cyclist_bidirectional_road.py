@@ -2613,8 +2613,8 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             # Generate output video using ffmpeg
             input_images_path = results_folder / "frame_%04d.jpg"
             output_video_path = results_folder / "output_video.mp4"
-            trajectory_evaluation_spatial = results_folder / "trajectory_evaluation_spatial.png"
-            trajectory_evaluations_trajectories = results_folder / "trajectory_evaluation_trajectries.png"
+            trajectory_evaluation_spatial = results_folder / "trajectory_evaluations_spatial.png"
+            trajectory_evaluations_trajectories = results_folder / "trajectory_evaluations_trajectries.png"
             
 
             subprocess.run([
