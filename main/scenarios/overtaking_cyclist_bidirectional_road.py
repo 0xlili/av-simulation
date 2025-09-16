@@ -2623,12 +2623,17 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
                 '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '28', str(output_video_path)
             ])
             # Display the video in Streamlit
+            st.subheader("⚙ Results ")
             if output_video_path.exists():
-                st.video(str(output_video_path))
+                
 
-
+                st.subheader("1. Generated trajectories from Step 1")
                 st.image(str(trajectory_evaluation_spatial), caption="Spatial Trajectory Evaluation")
+                st.subheader("2. Evaluation results of three trajectories from Step 2")
                 st.image(str(trajectory_evaluations_trajectories), caption="Trajectory Evaluation")
+                st.subheader("3. A video showing how the AV makes decisiosn that respect human reasons according to the weights you set")
+
+                st.video(str(output_video_path))
 
             else:
                 st.error("Video generation failed. Make sure the simulation produced frames.")
@@ -2637,9 +2642,10 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     # --- END OF DIAGNOSTIC BLOCK ---
 
 
-
-# Streamlit interface
-st.title("Overtaking Cyclist Bidirectional Road Simulation")
+# # --- Default Outputs ---
+# st.video(str(video_path))
+# st.image(str(spatial_image_path), caption="Spatial Trajectory Evaluation")
+# st.image(str(trajectory_image_path), caption="Trajectory Evaluation")
 
 script_dir = Path(__file__).parent
 grandparent_dir = script_dir.parent.parent
@@ -2649,41 +2655,182 @@ print(d_output_video_path)
 d_trajectory_evaluation_spatial = d_results_folder / "d_trajectory_evaluations_spatial.png"
 d_trajectory_evaluations_trajectories = d_results_folder / "d_trajectory_evaluations_trajectries.png"
 
-
 video_path = os.path.join(script_dir, "d_output_video.mp4")
 spatial_image_path = os.path.join(script_dir, "d_trajectory_evaluations_spatial.png")
 trajectory_image_path = os.path.join(script_dir, "d_trajectory_evaluations_trajectories.png")
 
-# --- Default Outputs ---
-st.video(str(video_path))
-st.image(str(spatial_image_path), caption="Spatial Trajectory Evaluation")
-st.image(str(trajectory_image_path), caption="Trajectory Evaluation")
+import streamlit as st
 
-# --- 1st weight set ---
+st.set_page_config(layout="wide")
+
+st.title("Towards Reasons-Responsive Decisions in Automated Vehicles")
+
+st.write(
+    "This simulator shows how an automated vehicle (AV) can make decisions that respect human reasons. To do this, the AV must:"
+)
+st.markdown(
+    """
+    1.  **Imagine options**: Generate different possible trajectories.
+    2.  **Weigh them up**: Check which option best fits human priorities (like safety, rules, and efficiency).
+    3.  **Commit**: Follow the chosen path smoothly.
+    """
+)
+st.write("Below, we walk through this process for the case of overtaking a cyclist.")
+
+st.header("Step 1: Generate Possible Paths")
+st.write(
+    "We use an algorithm that creates possible trajectories. It does this by giving weights to different human reasons considerations, such as rules, safety, and efficiency."
+)
+
+# st.image("Results.pdf", caption="Possible Trajectories", use_column_width=True)
+
+st.markdown(
+    """
+    Assume we have four possible trajectories: **T1**, **T2**, **T3**, and **T4** as follows:
+    * **T1** (Conservative following): Fully follows traffic rules (policymaker's priority). Ignores cyclist comfort/safety and driver's time efficiency. **Weights**: Policymaker 100%, Cyclist 0%, Driver 0%.
+    * **T2** (Small gap overtaking): Prioritizes driver's time efficiency. Still partly considers policymaker compliance, but only weakly considers cyclist safety. **Weights**: Policymaker 40%, Cyclist 20%, Driver 40%.
+    * **T3** (Medium gap overtaking): Balances policymaker compliance with cyclist safety. Driver's time efficiency is not considered. **Weights**: Policymaker 50%, Cyclist 50%, Driver 0%.
+    * **T4** (Large gap overtaking): Fastest option, prioritizing both driver's time efficiency and cyclist safety. Does not consider policymaker compliance. **Weights**: Policymaker 0%, Cyclist 50%, Driver 50%.
+    """
+)
+
+st.subheader("Preset weights for T2-T4")
+st.write(
+    "The bars below show the current weight mix used to generate each path. These are example presets only. **T1** is fixed as the conservative baseline (100% policy). The weights for each trajectory always sum to 100%. Move the sliders for Policy, Time, and Safety to set your own weights."
+)
+
+st.subheader("Trajectory 1")
+st.write("**Weights**: Policy: 100%, Time: 0%, Safety: 0%")
+
+st.subheader("Trajectory 2")
 with st.container():
-    st.subheader("1st weight set")
-    weight_policy = st.slider("Weight of Policy", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    weight_driver = st.slider("Weight of Driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
-    weight_cyclist = st.slider("Weight of Cyclist", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
+    st.markdown("Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%")
+    T2_policymaker = st.slider(
+        "Policy", min_value=0.0, max_value=1.0, value=0.4, step=0.01, key="T2_policy"
+    )
+    T2_driver = st.slider(
+        "Time Efficiency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.4,
+        step=0.01,
+        key="T2_driver",
+    )
+    T2_cyclist = st.slider(
+        "Cyclist Safety",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.2,
+        step=0.01,
+        key="T2_cyclist",
+    )
+    if not (T2_policymaker + T2_driver + T2_cyclist == 1.0):
+        st.error("The weights must sum to 1.0")
 
-# --- 2nd weight set ---
+st.subheader("Trajectory 3")
 with st.container():
-    st.subheader("2nd weight set")
-    xxx1 = st.slider("xxx1", value=0.40, step=0.01)
-    xxx2 = st.slider("xxx2", value=0.50, step=0.01)
-    xxx3 = st.slider("xxx3", value=0.50, step=0.01)
-    yyy1 = st.slider("yyy1", value=0.40, step=0.01)
-    yyy2 = st.slider("yyy2", value=0.50, step=0.01)
-    yyy3 = st.slider("yyy3", value=0.00, step=0.01)
-    zzz1 = st.slider("zzz1", value=0.20, step=0.01)
-    zzz2 = st.slider("zzz2", value=0.00, step=0.01)
-    zzz3 = st.slider("zzz3", value=0.50, step=0.01)
+    st.markdown("Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%")
+    T3_policymaker = st.slider(
+        "Policy", min_value=0.0, max_value=1.0, value=0.5, step=0.01, key="T3_policy"
+    )
+    T3_driver = st.slider(
+        "Time Efficiency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.0,
+        step=0.01,
+        key="T3_driver",
+    )
+    T3_cyclist = st.slider(
+        "Cyclist Safety",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.5,
+        step=0.01,
+        key="T3_cyclist",
+    )
+    if not (T3_policymaker + T3_driver + T3_cyclist == 1.0):
+        st.error("The weights must sum to 1.0")
 
+st.subheader("Trajectory 4")
+with st.container():
+    st.markdown("Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%")
+    T4_policymaker = st.slider(
+        "Policy", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="T4_policy"
+    )
+    T4_driver = st.slider(
+        "Time Efficiency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.5,
+        step=0.01,
+        key="T4_driver",
+    )
+    T4_cyclist = st.slider(
+        "Cyclist Safety",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.5,
+        step=0.01,
+        key="T4_cyclist",
+    )
+    if not (T4_policymaker + T4_driver + T4_cyclist == 1.0):
+        st.error("The weights must sum to 1.0")
+
+
+st.header("Step 2: Choose Evaluator Weights")
+st.write(
+    "After generating the possible trajectories, we now evaluate which one best matches the evaluator weights you set. Use the sliders to decide how much priority to give to each reason:"
+)
+st.markdown(
+    """
+    * **Policymaker** (rules)
+    * **Driver** (time efficiency)
+    * **Cyclist** (safety)
+    """
+)
+st.write(
+    "For example, if you set 40% for policymaker, 30% for driver, and 30% for cyclist, the system will choose the path that is most aligned with that mix."
+)
+
+with st.container():
+    st.subheader("Set your own weights")
+    evaluator_policymaker = st.slider(
+        "Keep Right Policy",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.33,
+        step=0.01,
+        key="evaluator_policy",
+    )
+    evaluator_driver = st.slider(
+        "Time Efficiency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.33,
+        step=0.01,
+        key="evaluator_driver",
+    )
+    evaluator_cyclist = st.slider(
+        "Cyclist Safety",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.34,
+        step=0.01,
+        key="evaluator_cyclist",
+    )
+    if not (evaluator_policymaker + evaluator_driver + evaluator_cyclist == 1.0):
+        st.error("The weights must sum to 1.0")
+
+st.header("Step 3: Commit and Run the Simulation")
+st.write(
+    "When you click Run Simulation, the algorithm generates three trajectories based on the weights you set. It then identifies the trajectory that best matches those weights. A model predictive control (MPC) module is used to track the selected trajectory."
+)
 
 
 
 # --- Parameter Inputs (new section) ---
-st.subheader("Simulation Parameters")
+st.subheader("⚙ Simulation Parameters ")
 with st.expander("Expand to edit simulation parameters"):
     # ScenarioParameters
     st.markdown("**Scenario Parameters**")
@@ -2725,6 +2872,8 @@ with st.expander("Expand to edit simulation parameters"):
         ideal_weight_driver = st.slider("ideal_weight_driver", min_value=0.0, max_value=1.0, value=0.33, step=0.01)
         ideal_weight_policymaker = st.slider("ideal_weight_policymaker", min_value=0.0, max_value=1.0, value=0.34, step=0.01)
 
+
+
 import streamlit.components.v1 as components
 
 if st.button("Run Simulation"):
@@ -2737,6 +2886,11 @@ if st.button("Run Simulation"):
             style="border:none;">
     </iframe>
     """
+    with st.expander("See Default Outputs"):
+        # --- Default Outputs ---
+        st.video(str(video_path))
+        st.image(str(spatial_image_path), caption="Spatial Trajectory Evaluation")
+        st.image(str(trajectory_image_path), caption="Trajectory Evaluation")
 
     components.html(dino_html, height=500)
     ignoree = Path(__file__).resolve().parent
