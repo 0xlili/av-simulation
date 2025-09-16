@@ -2705,10 +2705,10 @@ st.write("**Weights**: Policy: 100%, Time: 0%, Safety: 0%")
 st.subheader("Trajectory 2")
 with st.container():
     st.markdown("Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%")
-    T2_policymaker = st.slider(
+    xxx1 = st.slider(
         "Policy", min_value=0.0, max_value=1.0, value=0.4, step=0.01, key="T2_policy"
     )
-    T2_driver = st.slider(
+    yyy1 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
@@ -2716,7 +2716,7 @@ with st.container():
         step=0.01,
         key="T2_driver",
     )
-    T2_cyclist = st.slider(
+    zzz1 = st.slider(
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
@@ -2730,10 +2730,10 @@ with st.container():
 st.subheader("Trajectory 3")
 with st.container():
     st.markdown("Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%")
-    T3_policymaker = st.slider(
+    xxx2 = st.slider(
         "Policy", min_value=0.0, max_value=1.0, value=0.5, step=0.01, key="T3_policy"
     )
-    T3_driver = st.slider(
+    yyy2 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
@@ -2741,7 +2741,7 @@ with st.container():
         step=0.01,
         key="T3_driver",
     )
-    T3_cyclist = st.slider(
+    zzz2 = st.slider(
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
@@ -2755,10 +2755,10 @@ with st.container():
 st.subheader("Trajectory 4")
 with st.container():
     st.markdown("Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%")
-    T4_policymaker = st.slider(
+    xxx3 = st.slider(
         "Policy", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="T4_policy"
     )
-    T4_driver = st.slider(
+    yyy3 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
@@ -2766,7 +2766,7 @@ with st.container():
         step=0.01,
         key="T4_driver",
     )
-    T4_cyclist = st.slider(
+    zzz3 = st.slider(
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
@@ -2795,7 +2795,7 @@ st.write(
 
 with st.container():
     st.subheader("Set your own weights")
-    evaluator_policymaker = st.slider(
+    weight_policy = st.slider(
         "Keep Right Policy",
         min_value=0.0,
         max_value=1.0,
@@ -2803,7 +2803,7 @@ with st.container():
         step=0.01,
         key="evaluator_policy",
     )
-    evaluator_driver = st.slider(
+    weight_driver = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
@@ -2811,7 +2811,7 @@ with st.container():
         step=0.01,
         key="evaluator_driver",
     )
-    evaluator_cyclist = st.slider(
+    weight_cyclist = st.slider(
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
