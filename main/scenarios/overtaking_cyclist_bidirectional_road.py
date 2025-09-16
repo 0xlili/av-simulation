@@ -2724,7 +2724,7 @@ with st.container():
         step=0.01,
         key="T2_cyclist",
     )
-    if not (T2_policymaker + T2_driver + T2_cyclist == 1.0):
+    if not (xxx1 + yyy1 + zzz1 == 1.0):
         st.error("The weights must sum to 1.0")
 
 st.subheader("Trajectory 3")
@@ -2749,7 +2749,7 @@ with st.container():
         step=0.01,
         key="T3_cyclist",
     )
-    if not (T3_policymaker + T3_driver + T3_cyclist == 1.0):
+    if not (xxx2 + yyy2 + zzz2 == 1.0):
         st.error("The weights must sum to 1.0")
 
 st.subheader("Trajectory 4")
@@ -2774,7 +2774,7 @@ with st.container():
         step=0.01,
         key="T4_cyclist",
     )
-    if not (T4_policymaker + T4_driver + T4_cyclist == 1.0):
+    if not (xxx3 + yyy3 + zzz3 == 1.0):
         st.error("The weights must sum to 1.0")
 
 
