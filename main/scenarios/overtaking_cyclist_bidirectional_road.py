@@ -485,10 +485,10 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
 
     # Define trajectory types for subtitles
     trajectory_descriptions = {
-        0: "Small-Gap Overtaking",
-        1: "Medium-Gap Overtaking",
-        2: "Large-Gap Overtaking",
-        3: "Conservative Following"
+        0: "Trajectory 1",
+        1: "Trajectory 2",
+        2: "Trajectory 3",
+        3: "Trajectory 4"
     }
 
     # Only use up to 4 trajectories
