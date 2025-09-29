@@ -2819,7 +2819,7 @@ with st.container():
         step=0.01,
         key="evaluator_cyclist",
     )
-    if not (weight_driver + weight_driver + weight_cyclist == 1.0):
+    if not (weight_policy + weight_driver + weight_cyclist == 1.0):
         st.error("The weights must sum to 1.0")
 
 st.header("Step 3: Commit and Run the Simulation")
