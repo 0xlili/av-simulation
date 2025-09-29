@@ -34,12 +34,15 @@ NodeType = Tuple[float, float, float]
 class MotionPrimitiveSearch:
     def __init__(self, scenario: Scenario, car_dimensions: CarDimensions, mps: Dict[str, MotionPrimitive],
                  margin: float,
+                 xxx0: float,
                  xxx1: float,
                  xxx2: float,
                  xxx3: float,
+                 yyy0: float,
                  yyy1: float,
                  yyy2: float,
                  yyy3: float,
+                 zzz0: float,
                  zzz1: float,
                  zzz2: float,
                  zzz3: float,
@@ -89,9 +92,9 @@ class MotionPrimitiveSearch:
         self._a_star: AStar[NodeType] = AStar(neighbor_function=self.neighbor_function)
         
         # Initialize high-level reasoning weights (as lists for multiple trajectory generation)
-        self._wh_ego_list = wh_ego if wh_ego else [xxx1, xxx2, xxx3]
-        self._wh_policy_list = wh_policy if wh_policy else [yyy1, yyy2, yyy3]
-        self._wh_rUser1_list = wh_rUser1 if wh_rUser1 else [zzz1, zzz2, zzz3]
+        self._wh_ego_list = wh_ego if wh_ego else [xxx0, xxx1, xxx2, xxx3]
+        self._wh_policy_list = wh_policy if wh_policy else [yyy0, yyy1, yyy2, yyy3]
+        self._wh_rUser1_list = wh_rUser1 if wh_rUser1 else [zzz0, zzz1, zzz2, zzz3]
         self._wh_rUser2_list = wh_rUser2 if wh_rUser2 else [0.0, 0.0, 0.0]
         self._wh_rUser3_list = wh_rUser3 if wh_rUser3 else [0.0, 0.0, 0.0]
         
