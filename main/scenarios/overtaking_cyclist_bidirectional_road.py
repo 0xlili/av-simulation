@@ -2661,7 +2661,7 @@ trajectory_image_path = os.path.join(script_dir, "d_trajectory_evaluations_traje
 
 import streamlit as st
 
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 st.title("Towards Reasons-Responsive Decisions in Automated Vehicles")
 
