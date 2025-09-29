@@ -40,7 +40,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False, save_path=None) -> None:
+def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3, replanner: bool = False, vis_frame: bool = False, save_weight_table: bool = False, save_path=None) -> None:
     """
     Main function to simulate the scenario of an AV overtaking a cyclist in a bidirectional road.
 
@@ -86,7 +86,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
 
     # Run motion primitive search
     cost, path, trajectory_full, search_runtime = run_motion_primitive_search(scenario_no_obstacles, car_dimensions,
-                                                                              mps,xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3)
+                                                                              mps,xxx0=xxx0, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy0=yyy0, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz0=zzz0, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3)
 
     # Initialize MPC, set max speed to cyclist speed if the AV is following the cyclist
     if IS_FOLLOWING == True:
@@ -158,7 +158,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
                                  trajs_moving_obstacles, scenario_visualization,
                                  reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                                  reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                                 time_values, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3,
+                                 time_values, xxx0=xxx0, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy0=yyy0, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz0=zzz0, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3,
                                  max_speed=MPCParameters.MAX_SPEED_FREEWAY,
                                  is_following=IS_FOLLOWING,
                                  vis_frame=vis_frame,
@@ -299,7 +299,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
                    trajs_moving_obstacles, scenario_visualization,
                    reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                    reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values,
-                   time_values, max_speed, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3,
+                   time_values, max_speed, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3,
                    is_following=True, vis_frame=False, save_weight_table=False, time_elapsed_driver=0.0, time_passed_cyclist=0.0):
     """
     Perform a replan based on the current state and moving obstacles.
@@ -335,7 +335,7 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     logger.info(f"Initial position: {scenario_obstacles.start}")
 
     # Perform motion primitive search
-    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius,
+    search = MotionPrimitiveSearch(scenario_obstacles, car_dimensions, mps, xxx0=xxx0, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy0=yyy0, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz0=zzz0, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius,
                                    moving_obstacles_state=bicycle_state,
                                     driver_elapsed_time=time_elapsed_driver,
                                     cyclist_elapsed_time=time_passed_cyclist
@@ -1953,7 +1953,7 @@ def reasons_evaluation(reasons_cyclist_comfort, reasons_driver_time_eff, reasons
     return replan_needed, replan_tracker
 
 
-def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3) -> tuple:
+def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3) -> tuple:
     """
     Run the motion primitive search algorithm.
 
@@ -1966,7 +1966,7 @@ def run_motion_primitive_search(scenario_no_obstacles, car_dimensions, mps, xxx1
         tuple: A tuple containing the cost, path, and trajectory.
     """
     start_time = time.time()
-    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius)
+    search = MotionPrimitiveSearch(scenario_no_obstacles, car_dimensions, mps, xxx0=xxx0, xxx1=xxx1, xxx2=xxx2, xxx3=xxx3, yyy0=yyy0, yyy1=yyy1, yyy2=yyy2, yyy3=yyy3, zzz0=zzz0, zzz1=zzz1, zzz2=zzz2, zzz3=zzz3, margin=car_dimensions.radius)
     cost, path, trajectory_full = search.run(debug=True)
     logger.info("Search finished")
     plot_motion_primitives(search, scenario_no_obstacles, path, car_dimensions)
@@ -2574,7 +2574,7 @@ class CyclistParameters:
 """
     with open(PARAMETERS_PATH, "w") as f:
         f.write(file_content)
-def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3):
+def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3):
     # Use pathlib to get the directory of the current file
     script_dir = Path(__file__).parent
     
@@ -2596,7 +2596,7 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     # If not, you must fix the code inside main() to use this folder.
     
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx1, xxx2, xxx3, yyy1, yyy2, yyy3, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False, save_path=results_folder)
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False, save_path=results_folder)
     
     # --- START OF DIAGNOSTIC BLOCK ---
     st.info("Checking for generated frames...")
@@ -2701,18 +2701,51 @@ st.write(
 
 st.subheader("Trajectory 1")
 st.write("**Weights**: Policy: 100%, Time: 0%, Safety: 0%")
-
-st.subheader("Trajectory 2")
 with st.container():
-    st.markdown("Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%")
-    xxx1 = st.slider(
-        "Policy", min_value=0.0, max_value=1.0, value=0.4, step=0.01, key="T2_policy"
+    st.markdown("Preset weights: **Policymaker**: 100%, **Driver**: 0%, **Cyclist**: 0%")
+    yyy0 = st.slider(
+        "Policy", 
+        min_value=0.0, 
+        max_value=1.0, 
+        value=1.0, 
+        step=0.01, 
+        key="T1_policy"
     )
-    yyy1 = st.slider(
+    xxx0 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
-        value=0.4,
+        value=0.0,
+        step=0.01,
+        key="T1_driver",
+    )
+    zzz0 = st.slider(
+        "Cyclist Safety",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.0,
+        step=0.01,
+        key="T1_cyclist",
+    )
+    if not (xxx0 + yyy0 + zzz0 == 1.0):
+        st.error("The weights must sum to 1.0")
+
+st.subheader("Trajectory 2")
+with st.container():
+    st.markdown("Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%")
+    yyy1 = st.slider(
+        "Policy", 
+        min_value=0.0, 
+        max_value=1.0, 
+        value=0.5, 
+        step=0.01, 
+        key="T2_policy"
+    )
+    xxx1 = st.slider(
+        "Time Efficiency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.0,
         step=0.01,
         key="T2_driver",
     )
@@ -2720,7 +2753,7 @@ with st.container():
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
-        value=0.2,
+        value=0.5,
         step=0.01,
         key="T2_cyclist",
     )
@@ -2729,15 +2762,15 @@ with st.container():
 
 st.subheader("Trajectory 3")
 with st.container():
-    st.markdown("Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%")
-    xxx2 = st.slider(
-        "Policy", min_value=0.0, max_value=1.0, value=0.5, step=0.01, key="T3_policy"
-    )
+    st.markdown("Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%")
     yyy2 = st.slider(
+        "Policy", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="T3_policy"
+    )
+    xxx2 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
-        value=0.0,
+        value=0.5,
         step=0.01,
         key="T3_driver",
     )
@@ -2754,15 +2787,15 @@ with st.container():
 
 st.subheader("Trajectory 4")
 with st.container():
-    st.markdown("Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%")
-    xxx3 = st.slider(
-        "Policy", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="T4_policy"
-    )
+    st.markdown("Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%")
     yyy3 = st.slider(
+        "Policy", min_value=0.0, max_value=1.0, value=0.4, step=0.01, key="T4_policy"
+    )
+    xxx3 = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
-        value=0.5,
+        value=0.4,
         step=0.01,
         key="T4_driver",
     )
@@ -2770,7 +2803,7 @@ with st.container():
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
-        value=0.5,
+        value=0.2,
         step=0.01,
         key="T4_cyclist",
     )
