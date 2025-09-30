@@ -2736,51 +2736,61 @@ COLOR_MAP = {
     f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY
 }
 
-# Inject custom CSS to change slider thumb and track colors (FINAL FIX)
-def set_slider_colors():
-    """
-    Injects CSS to customize the appearance of the st.slider component.
-    This uses a highly specific selector targeting the Streamlit widget container
-    based on the custom data-testid set by the component key.
-    """
-    css = f"""
-    <style>
-        /* Define the primary color variables for each slider type based on its key */
-        div[data-testid*="_policy"] {{ --slider-color: {COLOR_POLICY}; }}
-        div[data-testid*="_driver"] {{ --slider-color: {COLOR_TIME}; }}
-        div[data-testid*="_cyclist"] {{ --slider-color: {COLOR_SAFETY}; }}
-        
-        /* 1. Target the slider's track (the filled part) */
-        div.stSlider > div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
-            background-color: var(--slider-color) !important;
-        }}
-        
-        /* 2. Target the slider's thumb (the circle) */
-        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: var(--slider-color) !important;
-            border-color: var(--slider-color) !important;
-        }}
 
-        /* 3. Target the slider's border (the gray line) - often needed to make the color complete */
-        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"]::before {{
-            border: 1px solid var(--slider-color) !important;
+def set_slider_colors(key, color, value):
+    """
+    Injects highly specific CSS to force a custom color on the slider track and cursor
+    using the linear-gradient technique, which is more reliable than overriding Streamlit's
+    internal variables. This function must be called for EVERY slider.
+    """
+    # Streamlit uses the key to create a unique data-testid for the slider container
+    
+    # 1. Slider Track Color (using linear-gradient)
+    # The 'value' is used to define where the colored part ends and the gray part begins.
+    # We use the slider's key to target its specific track.
+    track_css = f'''
+    <style> 
+        /* Target the specific slider's track based on key */
+        div[data-testid*="{key}"] div.stSlider > div[data-baseweb = "slider"] > div > div {{
+            background: linear-gradient(to right, {color} 0%,  
+                                                {color} {value*100}%, 
+                                                rgba(151, 166, 195, 0.25) {value*100}%, 
+                                                rgba(151, 166, 195, 0.25) 100%) !important;
+        }} 
+    </style>'''
+    st.markdown(track_css, unsafe_allow_html=True)
+    
+    # 2. Slider Cursor Color
+    cursor_css = f'''
+    <style> 
+        /* Target the specific slider's cursor based on key */
+        div[data-testid*="{key}"] div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"]{{
+            background-color: {color} !important; 
+            border-color: {color} !important;
+            box-shadow: {color}40 0px 0px 0px 0.2rem !important; /* Adding a subtle glow effect */
+        }} 
+    </style>'''
+    st.markdown(cursor_css, unsafe_allow_html=True)
+    
+    # 3. Fix for the slider's background color on the left side (if it's white/light)
+    # This is often needed in dark mode when the linear gradient isn't perfect
+    fill_css = f'''
+    <style>
+        div[data-testid*="{key}"] div.stSlider > div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
+            background-color: {color} !important;
         }}
     </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
-# Call the function to set the custom colors
-set_slider_colors()
+    '''
+    st.markdown(fill_css, unsafe_allow_html=True)
 
 
-# --- Helper Function for Stacked Bar (Native Altair - FINAL FIX for Overlap) ---
+# --- Helper Function for Stacked Bar (Native Altair - FINAL) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
-    Creates a single, stacked bar using native Streamlit (Altair).
-    FIXED: Adjusts legend placement to prevent overlap with the bar.
+    Creates a single, thick, stacked bar using native Streamlit (Altair).
     """
     
-    # 1. Prepare data in a pandas DataFrame format required by Altair
+    # 1. Prepare data
     data = pd.DataFrame({
         'Category': [f"{EMOJI_POLICY} Policy", f"{EMOJI_TIME} Time Efficiency", f"{EMOJI_SAFETY} Cyclist Safety"],
         'Weight': [yyy, xxx, zzz],
@@ -2813,22 +2823,21 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
         color=alt.Color('Category', 
                         scale=alt.Scale(domain=list(opacity_color_map.keys()), 
                                         range=list(opacity_color_map.values())),
-                        # FIX: Set the legend orientation to 'top' or specify offset
                         legend=alt.Legend(title="Weights", 
                                           orient="bottom", 
                                           columns=3,
                                           labelFontSize=14,
-                                          titlePadding=10, # Add padding below the title/bar
-                                          titleOrient='top')), # Keep title above legend items
+                                          titlePadding=0, # Removed padding as we are adding a break line
+                                          titleOrient='top')),
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
         width='container'
     )
     
-    # FIX: Increase the total height of the layered chart to provide ample space for the legend.
+    # Combine charts and set total height
     final_chart = alt.layer(background_bar, stacked_chart).resolve_scale(
         y='independent' 
-    ).properties(height=100) 
+    ).properties(height=100) # Set height for the final combined chart
     
     st.altair_chart(final_chart, use_container_width=True)
 
@@ -2867,6 +2876,8 @@ def create_trajectory_sliders(
             step=0.01, 
             key=f"T{trajectory_number}_policy"
         )
+        # FIX: Call the CSS injector with the current value
+        set_slider_colors(f"T{trajectory_number}_policy", COLOR_POLICY, yyy)
         
         # Time Efficiency Slider (xxx) 
         xxx = st.slider(
@@ -2877,6 +2888,8 @@ def create_trajectory_sliders(
             step=0.01,
             key=f"T{trajectory_number}_driver",
         )
+        # FIX: Call the CSS injector with the current value
+        set_slider_colors(f"T{trajectory_number}_driver", COLOR_TIME, xxx)
         
         # Cyclist Safety Slider (zzz) 
         zzz = st.slider(
@@ -2887,12 +2900,18 @@ def create_trajectory_sliders(
             step=0.01,
             key=f"T{trajectory_number}_cyclist",
         )
+        # FIX: Call the CSS injector with the current value
+        set_slider_colors(f"T{trajectory_number}_cyclist", COLOR_SAFETY, zzz)
         
     total_sum = yyy + xxx + zzz
     is_valid = np.isclose(total_sum, 1.0)
 
     with col2:
         st.markdown("### Current Weight Distribution")
+        
+        # FIX: Force a break line for separation
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # Display the Stacked Bar using native Altair
         stacked_weight_bar_native(yyy, xxx, zzz, is_valid)
         
@@ -2909,54 +2928,19 @@ def create_trajectory_sliders(
 # -----------------------------------------------------
 
 # --- Trajectory 1 ---
-yyy0, xxx0, zzz0 = create_trajectory_sliders(
-    trajectory_number=1,
-    initial_yyy=1.0,
-    initial_xxx=0.0,
-    initial_zzz=0.0,
-    preset_policy_label=100,
-    preset_driver_label=0,
-    preset_cyclist_label=0,
-)
-
+yyy0, xxx0, zzz0 = create_trajectory_sliders(1, 1.0, 0.0, 0.0, 100, 0, 0)
 st.divider()
 
 # --- Trajectory 2 ---
-yyy1, xxx1, zzz1 = create_trajectory_sliders(
-    trajectory_number=2,
-    initial_yyy=0.5,
-    initial_xxx=0.0,
-    initial_zzz=0.5,
-    preset_policy_label=50,
-    preset_driver_label=0,
-    preset_cyclist_label=50,
-)
-
+yyy1, xxx1, zzz1 = create_trajectory_sliders(2, 0.5, 0.0, 0.5, 50, 0, 50)
 st.divider()
 
 # --- Trajectory 3 ---
-yyy2, xxx2, zzz2 = create_trajectory_sliders(
-    trajectory_number=3,
-    initial_yyy=0.0,
-    initial_xxx=0.5,
-    initial_zzz=0.5,
-    preset_policy_label=0,
-    preset_driver_label=50,
-    preset_cyclist_label=50,
-)
-
+yyy2, xxx2, zzz2 = create_trajectory_sliders(3, 0.0, 0.5, 0.5, 0, 50, 50)
 st.divider()
 
 # --- Trajectory 4 ---
-yyy3, xxx3, zzz3 = create_trajectory_sliders(
-    trajectory_number=4,
-    initial_yyy=0.4,
-    initial_xxx=0.4,
-    initial_zzz=0.2,
-    preset_policy_label=40,
-    preset_driver_label=40,
-    preset_cyclist_label=20,
-)
+yyy3, xxx3, zzz3 = create_trajectory_sliders(4, 0.4, 0.4, 0.2, 40, 40, 20)
 
 
 
