@@ -2712,85 +2712,70 @@ st.write(
 )
 
 import streamlit as st
-import numpy as np # Used for the more robust sum check
+import numpy as np
+import pandas as pd
+import altair as alt # Import Altair for the native chart
 
 # Set a wide layout for better bar visibility
+st.set_page_config(layout="wide", page_title="Trajectory Weight Simulator")
 
-# --- Helper Function for Stacked Bar ---
-# --- Helper Function for Stacked Bar ---
-def stacked_weight_bar(yyy, xxx, zzz, is_valid):
+# Define colors for Altair (must be consistent)
+COLOR_POLICY = "#4CAF50"  # Green
+COLOR_TIME = "#2196F3"    # Blue
+COLOR_SAFETY = "#F44336"  # Red
+COLOR_MAP = {
+    "Policy": COLOR_POLICY, 
+    "Time Efficiency": COLOR_TIME, 
+    "Cyclist Safety": COLOR_SAFETY
+}
+
+# --- Helper Function for Stacked Bar (Native Altair) ---
+def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
-    Creates a single, stacked bar representing the weights.
-    
-    Args:
-        yyy (float): Policy weight (Green).
-        xxx (float): Time Efficiency weight (Blue).
-        zzz (float): Cyclist Safety weight (Red).
-        is_valid (bool): True if weights sum to 1.0, False otherwise.
+    Creates a single, stacked bar using native Streamlit (Altair).
     """
     
-    # Define colors
-    COLOR_POLICY = "#4CAF50"  # Green
-    COLOR_TIME = "#2196F3"    # Blue
-    COLOR_SAFETY = "#F44336"  # Red
+    # 1. Prepare data in a pandas DataFrame format required by Altair
+    data = pd.DataFrame({
+        'Category': ["Policy", "Time Efficiency", "Cyclist Safety"],
+        'Weight': [yyy, xxx, zzz],
+        'ColorKey': ["Policy", "Time Efficiency", "Cyclist Safety"]
+    })
     
-    # Calculate percentages for width
-    p_yyy = yyy * 100
-    p_xxx = xxx * 100
-    p_zzz = zzz * 100
-    
-    # Opacity for "grey out" effect
-    # The bar is dimmed if the weights don't sum to 1.0
-    opacity = 1.0 if is_valid else 0.4
-    
-    # HTML structure for the stacked bar
-    bar_html = f"""
-    <div style="
-        height: 30px; 
-        border-radius: 5px; 
-        overflow: hidden; 
-        margin-top: 10px;
-        opacity: {opacity}; 
-        transition: opacity 0.3s ease-in-out; 
-        display: flex;
-        width: 100%;
-        border: 1px solid #ddd;
-    ">
-        <div title="Policy: {p_yyy:.1f}%" style="
-            width: {p_yyy}%; 
-            background-color: {COLOR_POLICY}; 
-            height: 100%; 
-            transition: width 0.5s ease-out;
-        "></div>
+    # 2. Determine Opacity/Color for "Grey Out"
+    # Altair doesn't have a simple opacity setting for the whole chart,
+    # so we'll adjust the color domain to grey if invalid.
+    opacity_color_map = {
+        "Policy": COLOR_POLICY if is_valid else "#808080",
+        "Time Efficiency": COLOR_TIME if is_valid else "#808080",
+        "Cyclist Safety": COLOR_SAFETY if is_valid else "#808080"
+    }
+
+    # 3. Create the Altair Stacked Bar Chart
+    chart = alt.Chart(data).mark_bar().encode(
+        # The x-axis shows the weight (sum should be 1.0)
+        x=alt.X('Weight', axis=None), 
         
-        <div title="Time Efficiency: {p_xxx:.1f}%" style="
-            width: {p_xxx}%; 
-            background-color: {COLOR_TIME}; 
-            height: 100%; 
-            transition: width 0.5s ease-out;
-        "></div>
+        # The y-axis is a constant to force a single bar
+        y=alt.Y('constant:N', title=None, axis=None), 
         
-        <div title="Cyclist Safety: {p_zzz:.1f}%" style="
-            width: {p_zzz}%; 
-            background-color: {COLOR_SAFETY}; 
-            height: 100%; 
-            transition: width 0.5s ease-out;
-        "></div>
-    </div>
-    """
+        # The color is based on the category, using the conditional color map
+        color=alt.Color('Category', 
+                        scale=alt.Scale(domain=list(opacity_color_map.keys()), 
+                                        range=list(opacity_color_map.values())),
+                        legend=alt.Legend(title=None, 
+                                          orient="bottom", 
+                                          columns=3,
+                                          labelFontSize=14)),
+        # Tooltip for better interactivity
+        tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
+    ).properties(
+        # Set a fixed height and remove title
+        height=30
+    )
     
-    # Legend/Label HTML (only show if valid)
-    label_html = ""
-    if is_valid:
-        label_html = f"""
-        <div style="display: flex; justify-content: space-around; font-size: 14px; font-weight: bold; margin-top: 5px;">
-            <span style="color: {COLOR_POLICY};">Policy: {p_yyy:.0f}%</span>
-            <span style="color: {COLOR_TIME};">Time Eff.: {p_xxx:.0f}%</span>
-            <span style="color: {COLOR_SAFETY};">Cyclist Saf.: {p_zzz:.0f}%</span>
-        </div>
-        """
-    
-    st.markdown(bar_html + label_html, unsafe_allow_html=True)
+    # The animation is provided by Altair/Streamlit's reactive updates.
+    st.altair_chart(chart, use_container_width=True)
 
 
 # --- Main Slider Function ---
@@ -2809,7 +2794,6 @@ def create_trajectory_sliders(
     
     st.subheader(f"Trajectory {trajectory_number}")
     
-    # The initial st.write is updated to show the preset weights clearly
     st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
 
     # Use columns to put the bar next to the sliders for a neat layout
@@ -2856,19 +2840,19 @@ def create_trajectory_sliders(
 
     with col2:
         st.markdown("### Current Weight Distribution")
-        # Display the Stacked Bar
-        stacked_weight_bar(yyy, xxx, zzz, is_valid)
+        # Display the Stacked Bar using native Altair
+        stacked_weight_bar_native(yyy, xxx, zzz, is_valid)
         
-        # Display the error message only if invalid
+        # Display the validation message
         if not is_valid:
             st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(total_sum))
         else:
-            st.success("Weights sum to 1.0! Current Policy: {:.2f}, Time: {:.2f}, Safety: {:.2f}".format(yyy, xxx, zzz))
+            st.success("Weights sum to 1.0! Policy: {:.2f}, Time: {:.2f}, Safety: {:.2f}".format(yyy, xxx, zzz))
 
     return yyy, xxx, zzz
 
 # -----------------------------------------------------
-# --- MAIN APPLICATION CALLS (Maintaining original variable names) ---
+# --- MAIN APPLICATION CALLS (Using original variable names) ---
 # -----------------------------------------------------
 
 # --- Trajectory 1 ---
@@ -2920,7 +2904,6 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
-
 
 st.header("Step 2: Choose Evaluator Weights")
 st.write(
