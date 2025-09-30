@@ -2714,41 +2714,90 @@ st.write(
 import streamlit as st
 import numpy as np
 import pandas as pd
-import altair as alt # Import Altair for the native chart
+import altair as alt
 
-# Set a wide layout for better bar visibility
+# --- Configuration and Styles ---
+
+# Set a wide layout
 st.set_page_config(layout="wide", page_title="Trajectory Weight Simulator")
 
-# Define colors for Altair (must be consistent)
-COLOR_POLICY = "#4CAF50"  # Green
-COLOR_TIME = "#2196F3"    # Blue
-COLOR_SAFETY = "#F44336"  # Red
+# Define colors and emojis
+# Policy (Green) 
+COLOR_POLICY = "#4CAF50" 
+EMOJI_POLICY = "⚖️" 
+# Time Efficiency (Blue) 
+COLOR_TIME = "#2196F3"    
+EMOJI_TIME = "⏱️" 
+# Cyclist Safety (Red) 
+COLOR_SAFETY = "#F44336"  
+EMOJI_SAFETY = "🚴" 
+
+# Map for Altair
 COLOR_MAP = {
-    "Policy": COLOR_POLICY, 
-    "Time Efficiency": COLOR_TIME, 
-    "Cyclist Safety": COLOR_SAFETY
+    f"{EMOJI_POLICY} Policy": COLOR_POLICY, 
+    f"{EMOJI_TIME} Time Efficiency": COLOR_TIME, 
+    f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY
 }
+
+# Inject custom CSS to change slider thumb and track colors
+def set_slider_colors():
+    """Injects CSS to customize the appearance of the st.slider component based on key."""
+    css = f"""
+    <style>
+        /* Target the specific slider keys and apply colors */
+        
+        /* Policy Sliders (Green) */
+        div[data-testid*="T1_policy"], div[data-testid*="T2_policy"], div[data-testid*="T3_policy"], div[data-testid*="T4_policy"] {{
+            --primary-color: {COLOR_POLICY}; 
+        }}
+        
+        /* Time Efficiency Sliders (Blue) */
+        div[data-testid*="T1_driver"], div[data-testid*="T2_driver"], div[data-testid*="T3_driver"], div[data-testid*="T4_driver"] {{
+            --primary-color: {COLOR_TIME}; 
+        }}
+        
+        /* Cyclist Safety Sliders (Red) */
+        div[data-testid*="T1_cyclist"], div[data-testid*="T2_cyclist"], div[data-testid*="T3_cyclist"], div[data-testid*="T4_cyclist"] {{
+            --primary-color: {COLOR_SAFETY}; 
+        }}
+
+        /* General slider track (the colored part) */
+        div.stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+            background-color: var(--primary-color) !important;
+        }}
+        
+        /* General slider thumb (the circle) */
+        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+# Call the function to set the custom colors
+set_slider_colors()
+
 
 # --- Helper Function for Stacked Bar (Native Altair) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
     Creates a single, stacked bar using native Streamlit (Altair).
+    Bar height is increased via the 'height' property.
     """
     
     # 1. Prepare data in a pandas DataFrame format required by Altair
     data = pd.DataFrame({
-        'Category': ["Policy", "Time Efficiency", "Cyclist Safety"],
+        'Category': [f"{EMOJI_POLICY} Policy", f"{EMOJI_TIME} Time Efficiency", f"{EMOJI_SAFETY} Cyclist Safety"],
         'Weight': [yyy, xxx, zzz],
-        'ColorKey': ["Policy", "Time Efficiency", "Cyclist Safety"]
     })
     
     # 2. Determine Opacity/Color for "Grey Out"
-    # Altair doesn't have a simple opacity setting for the whole chart,
-    # so we'll adjust the color domain to grey if invalid.
+    # Adjust the color domain to grey if invalid.
     opacity_color_map = {
-        "Policy": COLOR_POLICY if is_valid else "#808080",
-        "Time Efficiency": COLOR_TIME if is_valid else "#808080",
-        "Cyclist Safety": COLOR_SAFETY if is_valid else "#808080"
+        f"{EMOJI_POLICY} Policy": COLOR_POLICY if is_valid else "#808080",
+        f"{EMOJI_TIME} Time Efficiency": COLOR_TIME if is_valid else "#808080",
+        f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY if is_valid else "#808080"
     }
 
     # 3. Create the Altair Stacked Bar Chart
@@ -2763,18 +2812,20 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
         color=alt.Color('Category', 
                         scale=alt.Scale(domain=list(opacity_color_map.keys()), 
                                         range=list(opacity_color_map.values())),
-                        legend=alt.Legend(title=None, 
+                        legend=alt.Legend(title="Weights", 
                                           orient="bottom", 
                                           columns=3,
                                           labelFontSize=14)),
         # Tooltip for better interactivity
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
-        # Set a fixed height and remove title
-        height=30
+        # Increase the bar height here (was 30)
+        height=60
+    ).configure_view(
+        # Remove border around the chart
+        strokeWidth=0
     )
     
-    # The animation is provided by Altair/Streamlit's reactive updates.
     st.altair_chart(chart, use_container_width=True)
 
 
@@ -2804,9 +2855,9 @@ def create_trajectory_sliders(
             f"Set your weights below:"
         )
         
-        # Policy Slider (yyy)
+        # Policy Slider (yyy) - now with EMOJI
         yyy = st.slider(
-            "Policy", 
+            f"{EMOJI_POLICY} Policy", 
             min_value=0.0, 
             max_value=1.0, 
             value=initial_yyy, 
@@ -2814,9 +2865,9 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_policy"
         )
         
-        # Time Efficiency Slider (xxx)
+        # Time Efficiency Slider (xxx) - now with EMOJI
         xxx = st.slider(
-            "Time Efficiency",
+            f"{EMOJI_TIME} Time Efficiency",
             min_value=0.0,
             max_value=1.0,
             value=initial_xxx,
@@ -2824,9 +2875,9 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_driver",
         )
         
-        # Cyclist Safety Slider (zzz)
+        # Cyclist Safety Slider (zzz) - now with EMOJI
         zzz = st.slider(
-            "Cyclist Safety",
+            f"{EMOJI_SAFETY} Cyclist Safety",
             min_value=0.0,
             max_value=1.0,
             value=initial_zzz,
@@ -2904,6 +2955,8 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
+
+
 
 st.header("Step 2: Choose Evaluator Weights")
 st.write(
