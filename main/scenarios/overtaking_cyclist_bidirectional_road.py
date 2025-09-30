@@ -2711,91 +2711,170 @@ st.write(
     "The bars below show the current weight mix used to generate each path. These are example presets only. **T1** is fixed as the conservative baseline (100% policy). The weights for each trajectory always sum to 100%. Move the sliders for Policy, Time, and Safety to set your own weights."
 )
 
-import plotly.graph_objects as go
+import streamlit as st
 
-def make_sliders(traj_name, preset_text, default_policy, default_time, default_cyclist, key_prefix):
-    st.subheader(traj_name)
-    st.markdown(preset_text)
-    yyy = st.slider(
-        "Policy",
-        min_value=0.0,
-        max_value=1.0,
-        value=default_policy,
-        step=0.01,
-        key=f"{key_prefix}_policy"
+# Function to create a custom progress bar using HTML/CSS for color,
+# since st.progress doesn't allow custom colors easily.
+# This approach uses st.markdown to inject HTML/CSS.
+# The animation is a built-in feature of how Streamlit re-renders.
+def colored_bar(label, value, color):
+    """
+    Creates a simple colored bar using markdown/HTML.
+    
+    Args:
+        label (str): The label for the bar (e.g., "Policy").
+        value (float): The current weight (0.0 to 1.0).
+        color (str): The CSS color name or hex code.
+    """
+    st.markdown(
+        f"""
+        <div style="font-weight: bold; margin-top: 10px;">{label}: {value*100:.0f}%</div>
+        <div style="
+            background-color: #ddd; 
+            border-radius: 5px; 
+            overflow: hidden; 
+            height: 20px; 
+            margin-bottom: 5px;
+        ">
+            <div style="
+                width: {value*100}%; 
+                background-color: {color}; 
+                height: 100%; 
+                transition: width 0.5s ease-in-out; /* Animation effect */
+            "></div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-    xxx = st.slider(
-        "Time Efficiency",
-        min_value=0.0,
-        max_value=1.0,
-        value=default_time,
-        step=0.01,
-        key=f"{key_prefix}_driver",
-    )
-    zzz = st.slider(
-        "Cyclist Safety",
-        min_value=0.0,
-        max_value=1.0,
-        value=default_cyclist,
-        step=0.01,
-        key=f"{key_prefix}_cyclist",
-    )
 
-    if not (round(xxx + yyy + zzz, 2) == 1.0):
-        st.error("The weights must sum to 1.0")
+def create_trajectory_sliders(
+    trajectory_number, 
+    initial_yyy, 
+    initial_xxx, 
+    initial_zzz, 
+    preset_policy_label,
+    preset_driver_label,
+    preset_cyclist_label,
+):
+    """
+    Creates the sliders, validation, and animated bars for a single trajectory.
+    
+    Args:
+        trajectory_number (int): The number for the subheader (e.g., 1, 2, 3, 4).
+        initial_yyy (float): Initial value for Policy (yyy).
+        initial_xxx (float): Initial value for Time Efficiency (xxx).
+        initial_zzz (float): Initial value for Cyclist Safety (zzz).
+        preset_policy_label (int): Preset weight for Policymaker (for display).
+        preset_driver_label (int): Preset weight for Driver (for display).
+        preset_cyclist_label (int): Preset weight for Cyclist (for display).
+        
+    Returns:
+        tuple: (yyy, xxx, zzz) - the current slider values.
+    """
+    
+    st.subheader(f"Trajectory {trajectory_number}")
+    
+    # Updated write for weights
+    st.write(f"**Weights**: Policy: {initial_yyy*100:.0f}%, Time: {initial_xxx*100:.0f}%, Safety: {initial_zzz*100:.0f}%")
 
-    # Animated colored bars
-    fig = go.Figure(go.Bar(
-        x=[yyy, xxx, zzz],
-        y=["Policy", "Time", "Cyclist"],
-        orientation="h",
-        marker=dict(color=["green", "blue", "red"]),
-    ))
-    fig.update_layout(
-        xaxis=dict(range=[0, 1]),
-        transition_duration=500,
-        height=300,
-        margin=dict(l=100, r=20, t=20, b=20)
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    with st.container():
+        # Updated markdown for preset weights
+        st.markdown(
+            f"Preset weights: **Policymaker**: {preset_policy_label}%, **Driver**: {preset_driver_label}%, **Cyclist**: {preset_cyclist_label}%"
+        )
+        
+        # Policy Slider (yyy) - Green
+        yyy = st.slider(
+            "Policy", 
+            min_value=0.0, 
+            max_value=1.0, 
+            value=initial_yyy, 
+            step=0.01, 
+            key=f"T{trajectory_number}_policy"
+        )
+        
+        # Time Efficiency Slider (xxx) - Blue
+        xxx = st.slider(
+            "Time Efficiency",
+            min_value=0.0,
+            max_value=1.0,
+            value=initial_xxx,
+            step=0.01,
+            key=f"T{trajectory_number}_driver",
+        )
+        
+        # Cyclist Safety Slider (zzz) - Red
+        zzz = st.slider(
+            "Cyclist Safety",
+            min_value=0.0,
+            max_value=1.0,
+            value=initial_zzz,
+            step=0.01,
+            key=f"T{trajectory_number}_cyclist",
+        )
+        
+        # Animated and Colored Bars
+        colored_bar("Policy (Green)", yyy, "green")
+        colored_bar("Time Efficiency (Blue)", xxx, "blue")
+        colored_bar("Cyclist Safety (Red)", zzz, "red")
 
-    return yyy, xxx, zzz
+        # Validation
+        if not (round(xxx + yyy + zzz, 2) == 1.0): # Use round to handle float precision issues
+            st.error("The weights must sum to 1.0")
 
-# ---- Call your sliders for each trajectory ----
-yyy0, xxx0, zzz0 = make_sliders(
-    "Trajectory 1",
-    "Preset weights: **Policymaker**: 100%, **Driver**: 0%, **Cyclist**: 0%",
-    default_policy=1.0,
-    default_time=0.0,
-    default_cyclist=0.0,
-    key_prefix="T1"
+        return yyy, xxx, zzz
+
+# --- Trajectory 1 ---
+# Policy (yyy0): Green
+# Time Efficiency (xxx0): Blue
+# Cyclist Safety (zzz0): Red
+yyy0, xxx0, zzz0 = create_trajectory_sliders(
+    trajectory_number=1,
+    initial_yyy=1.0,
+    initial_xxx=0.0,
+    initial_zzz=0.0,
+    preset_policy_label=100,
+    preset_driver_label=0,
+    preset_cyclist_label=0,
 )
 
-yyy1, xxx1, zzz1 = make_sliders(
-    "Trajectory 2",
-    "Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%",
-    default_policy=0.5,
-    default_time=0.0,
-    default_cyclist=0.5,
-    key_prefix="T2"
+st.divider()
+
+# --- Trajectory 2 ---
+yyy1, xxx1, zzz1 = create_trajectory_sliders(
+    trajectory_number=2,
+    initial_yyy=0.5,
+    initial_xxx=0.0,
+    initial_zzz=0.5,
+    preset_policy_label=50,
+    preset_driver_label=0,
+    preset_cyclist_label=50,
 )
 
-yyy2, xxx2, zzz2 = make_sliders(
-    "Trajectory 3",
-    "Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%",
-    default_policy=0.0,
-    default_time=0.5,
-    default_cyclist=0.5,
-    key_prefix="T3"
+st.divider()
+
+# --- Trajectory 3 ---
+yyy2, xxx2, zzz2 = create_trajectory_sliders(
+    trajectory_number=3,
+    initial_yyy=0.0,
+    initial_xxx=0.5,
+    initial_zzz=0.5,
+    preset_policy_label=0,
+    preset_driver_label=50,
+    preset_cyclist_label=50,
 )
 
-yyy3, xxx3, zzz3 = make_sliders(
-    "Trajectory 4",
-    "Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%",
-    default_policy=0.4,
-    default_time=0.4,
-    default_cyclist=0.2,
-    key_prefix="T4"
+st.divider()
+
+# --- Trajectory 4 ---
+yyy3, xxx3, zzz3 = create_trajectory_sliders(
+    trajectory_number=4,
+    initial_yyy=0.4,
+    initial_xxx=0.4,
+    initial_zzz=0.2,
+    preset_policy_label=40,
+    preset_driver_label=40,
+    preset_cyclist_label=20,
 )
 
 
