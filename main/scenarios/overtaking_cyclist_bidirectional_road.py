@@ -2729,7 +2729,7 @@ EMOJI_TIME = "⏱️"
 COLOR_SAFETY = "#F44336"  # Red 🚴
 EMOJI_SAFETY = "🚴" 
 
-# Map for Altair
+# Map for Altair (Not strictly needed here, but kept for consistency)
 COLOR_MAP = {
     f"{EMOJI_POLICY} Policy": COLOR_POLICY, 
     f"{EMOJI_TIME} Time Efficiency": COLOR_TIME, 
@@ -2739,12 +2739,8 @@ COLOR_MAP = {
 
 def set_slider_colors(key, color, value):
     """
-    Injects highly specific CSS to force a custom color on the slider track and cursor
-    using the linear-gradient technique, which is more reliable. This must be called 
-    for EVERY slider.
+    Injects highly specific CSS to force a custom color on the slider track and cursor.
     """
-    # Streamlit uses the key to create a unique data-testid for the slider container
-    
     # 1. Slider Track Color (using linear-gradient)
     track_css = f'''
     <style> 
@@ -2839,169 +2835,162 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     st.altair_chart(final_chart, use_container_width=True)
 
 
-# --- Main Slider Function (Updated Parameter) ---
+# --- Main Slider Function (Updated to check for run button control) ---
 def create_weight_sliders(
-    full_title, # NEW PARAMETER: full title string instead of number
+    full_title,
     initial_yyy, 
     initial_xxx, 
     initial_zzz, 
     preset_policy_label,
     preset_driver_label,
     preset_cyclist_label,
+    key_suffix="standard", # New parameter for key suffix
+    button_placeholder=None, # New parameter to pass the button container
 ):
     """
-    Creates the sliders, validation, and stacked animated bar for a single weight configuration.
+    Creates the sliders, validation, stacked animated bar, and controls the run button state.
+    
+    Returns: 
+        (yyy, xxx, zzz, is_valid)
     """
     
-    # Use the new full_title string for the subheader
-    st.subheader(full_title) 
+    # Ensure a unique key prefix based on the suffix
+    key_prefix = key_suffix.replace(" ", "_").replace(":", "_")
     
-    st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
+    with st.container():
+        st.subheader(full_title) 
+        
+        # Only show preset weights if they are provided
+        if preset_policy_label is not None:
+             st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
 
-    col1, col2 = st.columns([1, 1])
-    
-    # Since we no longer have a simple Trajectory number, we'll use a sanitized version of the title
-    # for the unique key prefixes, which is essential for the CSS selectors.
-    key_prefix = full_title.replace(" ", "_").replace(":", "_")
-    
-    with col1:
-        st.markdown(
-            f"Set your weights below:"
-        )
+        col1, col2 = st.columns([1, 1])
         
-        # Policy Slider (yyy) 
-        policy_key = f"{key_prefix}_policy"
-        yyy = st.slider(
-            f"{EMOJI_POLICY} Policy", 
-            min_value=0.0, 
-            max_value=1.0, 
-            value=initial_yyy, 
-            step=0.01, 
-            key=policy_key
-        )
-        set_slider_colors(policy_key, COLOR_POLICY, yyy)
-        
-        # Time Efficiency Slider (xxx) 
-        driver_key = f"{key_prefix}_driver"
-        xxx = st.slider(
-            f"{EMOJI_TIME} Time Efficiency",
-            min_value=0.0,
-            max_value=1.0,
-            value=initial_xxx,
-            step=0.01,
-            key=driver_key
-        )
-        set_slider_colors(driver_key, COLOR_TIME, xxx)
-        
-        # Cyclist Safety Slider (zzz) 
-        cyclist_key = f"{key_prefix}_cyclist"
-        zzz = st.slider(
-            f"{EMOJI_SAFETY} Cyclist Safety",
-            min_value=0.0,
-            max_value=1.0,
-            value=initial_zzz,
-            step=0.01,
-            key=cyclist_key
-        )
-        set_slider_colors(cyclist_key, COLOR_SAFETY, zzz)
-        
-    total_sum = yyy + xxx + zzz
-    is_valid = np.isclose(total_sum, 1.0)
+        with col1:
+            st.markdown(
+                f"Set your weights below:"
+            )
+            
+            # Policy Slider (yyy) 
+            policy_key = f"{key_prefix}_policy"
+            yyy = st.slider(
+                f"{EMOJI_POLICY} Policy", 
+                min_value=0.0, 
+                max_value=1.0, 
+                value=initial_yyy, 
+                step=0.01, 
+                key=policy_key
+            )
+            set_slider_colors(policy_key, COLOR_POLICY, yyy)
+            
+            # Time Efficiency Slider (xxx) 
+            driver_key = f"{key_prefix}_driver"
+            xxx = st.slider(
+                f"{EMOJI_TIME} Time Efficiency",
+                min_value=0.0,
+                max_value=1.0,
+                value=initial_xxx,
+                step=0.01,
+                key=driver_key
+            )
+            set_slider_colors(driver_key, COLOR_TIME, xxx)
+            
+            # Cyclist Safety Slider (zzz) 
+            cyclist_key = f"{key_prefix}_cyclist"
+            zzz = st.slider(
+                f"{EMOJI_SAFETY} Cyclist Safety",
+                min_value=0.0,
+                max_value=1.0,
+                value=initial_zzz,
+                step=0.01,
+                key=cyclist_key
+            )
+            set_slider_colors(cyclist_key, COLOR_SAFETY, zzz)
+            
+        total_sum = yyy + xxx + zzz
+        is_valid = np.isclose(total_sum, 1.0)
 
-    with col2:
-        st.markdown("### Current Weight Distribution")
-        
-        # Force a break line for separation
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Display the Stacked Bar using native Altair
-        stacked_weight_bar_native(yyy, xxx, zzz, is_valid)
-        
-        # Display the validation message
-        if not is_valid:
-            st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(total_sum))
-        else:
-            st.success("Weights sum to 1.0! Policy: {:.2f}, Time: {:.2f}, Safety: {:.2f}".format(yyy, xxx, zzz))
+        with col2:
+            st.markdown("### Current Weight Distribution")
+            
+            # Force a break line for separation
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Display the Stacked Bar using native Altair
+            stacked_weight_bar_native(yyy, xxx, zzz, is_valid)
+            
+            # Display the validation message
+            if not is_valid:
+                st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(total_sum))
+            else:
+                st.success("Weights sum to 1.0! Policy: {:.2f}, Time: {:.2f}, Safety: {:.2f}".format(yyy, xxx, zzz))
 
-    return yyy, xxx, zzz
+    # Control the run button in the external placeholder container
+    if button_placeholder:
+        with button_placeholder:
+            # The button is disabled if ANY weight set is invalid (i.e., this one)
+            st.button("Run Simulation", disabled=not is_valid, type="primary")
 
-# -----------------------------------------------------
-# --- MAIN APPLICATION CALLS (Using full titles) ---
-# -----------------------------------------------------
+    return yyy, xxx, zzz, is_valid
 
-# --- Trajectory 1 ---
-# Changed parameter from 1 to "Trajectory 1"
-yyy0, xxx0, zzz0 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0)
+# =========================================================================
+# --- MAIN APPLICATION LAYOUT ---
+# =========================================================================
+
+# --- Section 1: Original Four Trajectories ---
+st.header("Step 1: Explore Preset Trajectories")
+
+# Use a custom key_suffix for the original four sets
+create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
+st.divider()
+create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 50, 0, 50, key_suffix="T2")
+st.divider()
+create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 0, 50, 50, key_suffix="T3")
+st.divider()
+create_weight_sliders("Trajectory 4", 0.4, 0.4, 0.2, 40, 40, 20, key_suffix="T4")
 st.divider()
 
-# --- Trajectory 2 ---
-# Changed parameter from 2 to "Trajectory 2"
-yyy1, xxx1, zzz1 = create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 50, 0, 50)
+
+# --- Section 2: Set Your Own Weights (The new set) ---
+st.header("Step 2: Set Your Own Weights")
+
+# This set needs to return its validity flag to control the button
+# Use a distinct key_suffix for this set: "evaluator"
+weight_policy, weight_driver, weight_cyclist, is_evaluator_valid = create_weight_sliders(
+    full_title="Set your own weights",
+    initial_yyy=0.33, 
+    initial_xxx=0.33, 
+    initial_zzz=0.34, 
+    preset_policy_label=None, # Set to None to hide the preset line
+    preset_driver_label=None,
+    preset_cyclist_label=None,
+    key_suffix="evaluator"
+)
+
 st.divider()
 
-# --- Trajectory 3 ---
-# Changed parameter from 3 to "Trajectory 3"
-yyy2, xxx2, zzz2 = create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 0, 50, 50)
-st.divider()
 
-# --- Trajectory 4 ---
-# Changed parameter from 4 to "Trajectory 4"
-yyy3, xxx3, zzz3 = create_weight_sliders("Trajectory 4", 0.4, 0.4, 0.2, 40, 40, 20)
+# --- Section 3: Commit and Run the Simulation (The Button) ---
 
-
-
-
-
-st.header("Step 2: Choose Evaluator Weights")
-st.write(
-    "After generating the possible trajectories, we now evaluate which one best matches the evaluator weights you set. Use the sliders to decide how much priority to give to each reason:"
-)
-st.markdown(
-    """
-    * **Policymaker** (rules)
-    * **Driver** (time efficiency)
-    * **Cyclist** (safety)
-    """
-)
-st.write(
-    "For example, if you set 40% for policymaker, 30% for driver, and 30% for cyclist, the system will choose the path that is most aligned with that mix."
-)
-
-with st.container():
-    st.subheader("Set your own weights")
-    weight_policy = st.slider(
-        "Keep Right Policy",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.33,
-        step=0.01,
-        key="evaluator_policy",
-    )
-    weight_driver = st.slider(
-        "Time Efficiency",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.33,
-        step=0.01,
-        key="evaluator_driver",
-    )
-    weight_cyclist = st.slider(
-        "Cyclist Safety",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.34,
-        step=0.01,
-        key="evaluator_cyclist",
-    )
-    if not (weight_policy + weight_driver + weight_cyclist == 1.0):
-        st.error("The weights must sum to 1.0")
+# Create a container specifically for the button
+button_container = st.container()
 
 st.header("Step 3: Commit and Run the Simulation")
 st.write(
     "When you click Run Simulation, the algorithm generates three trajectories based on the weights you set. It then identifies the trajectory that best matches those weights. A model predictive control (MPC) module is used to track the selected trajectory."
 )
 
-
+# Place the button inside the designated container. 
+# The disabled state is controlled by the logic below.
+with button_container:
+    # Use the validity flag from the 'Set your own weights' section to disable the button.
+    # The button is ONLY enabled if the user-defined weights sum to 1.0.
+    st.button(
+        "Run Simulation", 
+        disabled=not is_evaluator_valid, 
+        type="primary", 
+        key="main_run_button"
+    )
 
 # --- Parameter Inputs (new section) ---
 st.subheader("⚙ Simulation Parameters ")
