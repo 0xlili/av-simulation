@@ -349,7 +349,18 @@ def perform_replan(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
 
     # Add the trajectory to the list of trajectories to the last position
     trajectories_full.append((follow_trajectory,(0.0, 0.0, 0.0, 0.0, 0.0)))
-    print(trajectories_full)
+    print("YOYOYOYOYOYO", trajectories_full)
+    print('''
+
+
+
+
+
+
+
+
+
+    ''')
 
     if save_weight_table == True:
         # Evaluate trajectories based on human-centered reasons
