@@ -2712,41 +2712,87 @@ st.write(
 )
 
 import streamlit as st
+import numpy as np # Used for the more robust sum check
 
-# Function to create a custom progress bar using HTML/CSS for color,
-# since st.progress doesn't allow custom colors easily.
-# This approach uses st.markdown to inject HTML/CSS.
-# The animation is a built-in feature of how Streamlit re-renders.
-def colored_bar(label, value, color):
+# Set a wide layout for better bar visibility
+st.set_page_config(layout="wide")
+
+
+# --- Helper Function for Stacked Bar ---
+def stacked_weight_bar(yyy, xxx, zzz, is_valid):
     """
-    Creates a simple colored bar using markdown/HTML.
+    Creates a single, stacked bar representing the weights.
     
     Args:
-        label (str): The label for the bar (e.g., "Policy").
-        value (float): The current weight (0.0 to 1.0).
-        color (str): The CSS color name or hex code.
+        yyy (float): Policy weight (Green).
+        xxx (float): Time Efficiency weight (Blue).
+        zzz (float): Cyclist Safety weight (Red).
+        is_valid (bool): True if weights sum to 1.0, False otherwise.
     """
-    st.markdown(
-        f"""
-        <div style="font-weight: bold; margin-top: 10px;">{label}: {value*100:.0f}%</div>
-        <div style="
-            background-color: #ddd; 
-            border-radius: 5px; 
-            overflow: hidden; 
-            height: 20px; 
-            margin-bottom: 5px;
-        ">
-            <div style="
-                width: {value*100}%; 
-                background-color: {color}; 
-                height: 100%; 
-                transition: width 0.5s ease-in-out; /* Animation effect */
-            "></div>
+    
+    # Define colors
+    COLOR_POLICY = "#4CAF50"  # Green
+    COLOR_TIME = "#2196F3"    # Blue
+    COLOR_SAFETY = "#F44336"  # Red
+    
+    # Calculate percentages for width
+    p_yyy = yyy * 100
+    p_xxx = xxx * 100
+    p_zzz = zzz * 100
+    
+    # Opacity for "grey out" effect
+    opacity = 1.0 if is_valid else 0.4
+    
+    # HTML structure for the stacked bar
+    bar_html = f"""
+    <div style="
+        height: 30px; 
+        border-radius: 5px; 
+        overflow: hidden; 
+        margin-top: 10px;
+        opacity: {opacity}; 
+        transition: opacity 0.3s ease-in-out; 
+        display: flex;
+        width: 100%;
+    ">
+        <div title="Policy: {p_yyy:.1f}%" style="
+            width: {p_yyy}%; 
+            background-color: {COLOR_POLICY}; 
+            height: 100%; 
+            transition: width 0.5s ease-out;
+        "></div>
+        
+        <div title="Time Efficiency: {p_xxx:.1f}%" style="
+            width: {p_xxx}%; 
+            background-color: {COLOR_TIME}; 
+            height: 100%; 
+            transition: width 0.5s ease-out;
+        "></div>
+        
+        <div title="Cyclist Safety: {p_zzz:.1f}%" style="
+            width: {p_zzz}%; 
+            background-color: {COLOR_SAFETY}; 
+            height: 100%; 
+            transition: width 0.5s ease-out;
+        "></div>
+    </div>
+    """
+    
+    # Legend/Label HTML (only show if valid)
+    label_html = ""
+    if is_valid:
+        label_html = f"""
+        <div style="display: flex; justify-content: space-around; font-size: 14px; font-weight: bold; margin-top: 5px;">
+            <span style="color: {COLOR_POLICY};">Policy: {p_yyy:.0f}%</span>
+            <span style="color: {COLOR_TIME};">Time Eff.: {p_xxx:.0f}%</span>
+            <span style="color: {COLOR_SAFETY};">Cyclist Saf.: {p_zzz:.0f}%</span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """
+    
+    st.markdown(bar_html + label_html, unsafe_allow_html=True)
 
+
+# --- Main Slider Function ---
 def create_trajectory_sliders(
     trajectory_number, 
     initial_yyy, 
@@ -2757,33 +2803,24 @@ def create_trajectory_sliders(
     preset_cyclist_label,
 ):
     """
-    Creates the sliders, validation, and animated bars for a single trajectory.
-    
-    Args:
-        trajectory_number (int): The number for the subheader (e.g., 1, 2, 3, 4).
-        initial_yyy (float): Initial value for Policy (yyy).
-        initial_xxx (float): Initial value for Time Efficiency (xxx).
-        initial_zzz (float): Initial value for Cyclist Safety (zzz).
-        preset_policy_label (int): Preset weight for Policymaker (for display).
-        preset_driver_label (int): Preset weight for Driver (for display).
-        preset_cyclist_label (int): Preset weight for Cyclist (for display).
-        
-    Returns:
-        tuple: (yyy, xxx, zzz) - the current slider values.
+    Creates the sliders, validation, and stacked animated bar for a single trajectory.
     """
     
     st.subheader(f"Trajectory {trajectory_number}")
     
-    # Updated write for weights
+    # This st.write is redundant if the stacked bar shows the values, but keeping it
+    # as per original structure.
     st.write(f"**Weights**: Policy: {initial_yyy*100:.0f}%, Time: {initial_xxx*100:.0f}%, Safety: {initial_zzz*100:.0f}%")
 
-    with st.container():
-        # Updated markdown for preset weights
+    # Use columns to put the bar next to the sliders for a neat layout
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
         st.markdown(
             f"Preset weights: **Policymaker**: {preset_policy_label}%, **Driver**: {preset_driver_label}%, **Cyclist**: {preset_cyclist_label}%"
         )
         
-        # Policy Slider (yyy) - Green
+        # Policy Slider (yyy)
         yyy = st.slider(
             "Policy", 
             min_value=0.0, 
@@ -2793,7 +2830,7 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_policy"
         )
         
-        # Time Efficiency Slider (xxx) - Blue
+        # Time Efficiency Slider (xxx)
         xxx = st.slider(
             "Time Efficiency",
             min_value=0.0,
@@ -2803,7 +2840,7 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_driver",
         )
         
-        # Cyclist Safety Slider (zzz) - Red
+        # Cyclist Safety Slider (zzz)
         zzz = st.slider(
             "Cyclist Safety",
             min_value=0.0,
@@ -2813,21 +2850,24 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_cyclist",
         )
         
-        # Animated and Colored Bars
-        colored_bar("Policy (Green)", yyy, "green")
-        colored_bar("Time Efficiency (Blue)", xxx, "blue")
-        colored_bar("Cyclist Safety (Red)", zzz, "red")
+    # Validation Check (use numpy.isclose for robust floating-point comparison)
+    is_valid = np.isclose(yyy + xxx + zzz, 1.0)
 
-        # Validation
-        if not (round(xxx + yyy + zzz, 2) == 1.0): # Use round to handle float precision issues
-            st.error("The weights must sum to 1.0")
+    with col2:
+        st.markdown("### Weight Distribution", help="This single bar represents the proportions of Policy (Green), Time Efficiency (Blue), and Cyclist Safety (Red).")
+        # Display the Stacked Bar
+        stacked_weight_bar(yyy, xxx, zzz, is_valid)
+        
+        if not is_valid:
+            st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(yyy + xxx + zzz))
 
-        return yyy, xxx, zzz
+    return yyy, xxx, zzz
+
+# -----------------------------------------------------
+# --- MAIN APPLICATION CALLS ---
+# -----------------------------------------------------
 
 # --- Trajectory 1 ---
-# Policy (yyy0): Green
-# Time Efficiency (xxx0): Blue
-# Cyclist Safety (zzz0): Red
 yyy0, xxx0, zzz0 = create_trajectory_sliders(
     trajectory_number=1,
     initial_yyy=1.0,
@@ -2876,7 +2916,6 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
-
 
 
 st.header("Step 2: Choose Evaluator Weights")
