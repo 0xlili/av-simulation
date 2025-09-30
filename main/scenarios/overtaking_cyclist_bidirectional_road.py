@@ -2722,14 +2722,11 @@ import altair as alt
 st.set_page_config(layout="wide", page_title="Trajectory Weight Simulator")
 
 # Define colors and emojis
-# Policy (Green) 
-COLOR_POLICY = "#4CAF50" 
+COLOR_POLICY = "#4CAF50"  # Green ⚖️
 EMOJI_POLICY = "⚖️" 
-# Time Efficiency (Blue) 
-COLOR_TIME = "#2196F3"    
+COLOR_TIME = "#2196F3"    # Blue ⏱️
 EMOJI_TIME = "⏱️" 
-# Cyclist Safety (Red) 
-COLOR_SAFETY = "#F44336"  
+COLOR_SAFETY = "#F44336"  # Red 🚴
 EMOJI_SAFETY = "🚴" 
 
 # Map for Altair
@@ -2742,51 +2739,23 @@ COLOR_MAP = {
 # Inject custom CSS to change slider thumb and track colors
 def set_slider_colors():
     """Injects CSS to customize the appearance of the st.slider component based on key."""
-    # Using specific selectors and !important for highest priority
     css = f"""
     <style>
-        /* Define the custom colors for each role */
-        .policy-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
-            background-color: {COLOR_POLICY} !important;
-        }}
-        .policy-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: {COLOR_POLICY} !important;
-            border-color: {COLOR_POLICY} !important;
-        }}
-
-        .time-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
-            background-color: {COLOR_TIME} !important;
-        }}
-        .time-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: {COLOR_TIME} !important;
-            border-color: {COLOR_TIME} !important;
-        }}
-
-        .safety-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
-            background-color: {COLOR_SAFETY} !important;
-        }}
-        .safety-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: {COLOR_SAFETY} !important;
-            border-color: {COLOR_SAFETY} !important;
-        }}
-
-        /* Ensure the main container holding the slider is tagged with the class */
-        /* This requires wrapping the slider in st.markdown to inject the class,
-           which is necessary for the CSS to work when direct data-testid selectors fail.
-           However, let's try a simpler approach first by only relying on st.markdown
-           to inject the general slider styles which sometimes works better.
-        */
-
-        /* Fallback: General track and thumb color override using a stronger selector */
-        div[data-testid^="stHorizontalBlock"] div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
-            background-color: var(--primary-color) !important;
-        }}
-        
         /* Define the variables on the element above the slider */
         div[data-testid*="_policy"] {{ --primary-color: {COLOR_POLICY}; }}
         div[data-testid*="_driver"] {{ --primary-color: {COLOR_TIME}; }}
         div[data-testid*="_cyclist"] {{ --primary-color: {COLOR_SAFETY}; }}
-
+        
+        /* General slider track (the colored part) */
+        div.stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+            background-color: var(--primary-color) !important;
+        }}
+        
+        /* General slider thumb (the circle) */
+        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -2795,11 +2764,11 @@ def set_slider_colors():
 set_slider_colors()
 
 
-# --- Helper Function for Stacked Bar (Native Altair - FIX) ---
+# --- Helper Function for Stacked Bar (Native Altair - FIX for LayerChart Error) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
     Creates a single, stacked bar using native Streamlit (Altair).
-    FIXED: Uses a proper x-scale to ensure the bar fills the width.
+    FIXED: Uses alt.layer() to combine charts correctly and resolves the TypeError.
     """
     
     # 1. Prepare data in a pandas DataFrame format required by Altair
@@ -2815,24 +2784,21 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
         f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY if is_valid else "#808080"
     }
     
-    # The bar that fills the entire width (total = 1.0)
+    # --- Background Bar (Full Width) ---
     background_bar = alt.Chart(pd.DataFrame({'x': [0], 'y': [1]})).mark_bar(
         color='#333333', 
-        height=60
+        height=60 # Thicker bar height
     ).encode(
         x=alt.X('x', scale=alt.Scale(domain=[0, 1]), axis=None),
         x2='y',
         y=alt.Y('constant:N', title=None, axis=None)
+    ).properties(
+        width='container' # Use 'container' for dynamic width
     )
 
-    # The actual stacked bar
+    # --- Actual Stacked Bar (Foreground) ---
     stacked_chart = alt.Chart(data).mark_bar(height=60).encode(
-        # The x-axis is set from 0 to 1 to ensure full width
         x=alt.X('Weight', axis=None, stack="normalize"), 
-        
-        # This is the key change: setting stack="normalize" tells Altair to treat the 
-        # sum of 'Weight' as 100% of the bar width.
-        
         y=alt.Y('constant:N', title=None, axis=None), 
         
         color=alt.Color('Category', 
@@ -2844,16 +2810,14 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
                                           labelFontSize=14)),
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
-        # Increase the bar height here
-        height=60
-    ).configure_view(
-        strokeWidth=0
+        width='container' # Use 'container' for dynamic width
     )
     
-    # Combine the background and the foreground stacked chart
-    final_chart = (background_bar + stacked_chart).resolve_scale(
+    # --- Layer the charts using alt.layer() ---
+    # This is the correct way to combine charts and avoid the LayerChart error.
+    final_chart = alt.layer(background_bar, stacked_chart).resolve_scale(
         y='independent' # Ensure both layers use the same y-scale
-    ).properties(height=60) # Set height for the final combined chart
+    ).properties(height=100) # Set height for the final combined chart (gives extra room for legend)
     
     st.altair_chart(final_chart, use_container_width=True)
 
@@ -2982,7 +2946,6 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
-
 
 st.header("Step 2: Choose Evaluator Weights")
 st.write(
