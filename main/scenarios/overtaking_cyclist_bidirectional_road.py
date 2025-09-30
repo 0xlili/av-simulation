@@ -2736,25 +2736,34 @@ COLOR_MAP = {
     f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY
 }
 
-# Inject custom CSS to change slider thumb and track colors
+# Inject custom CSS to change slider thumb and track colors (FINAL FIX)
 def set_slider_colors():
-    """Injects CSS to customize the appearance of the st.slider component based on key."""
+    """
+    Injects CSS to customize the appearance of the st.slider component.
+    This uses a highly specific selector targeting the Streamlit widget container
+    based on the custom data-testid set by the component key.
+    """
     css = f"""
     <style>
-        /* Define the variables on the element above the slider */
-        div[data-testid*="_policy"] {{ --primary-color: {COLOR_POLICY}; }}
-        div[data-testid*="_driver"] {{ --primary-color: {COLOR_TIME}; }}
-        div[data-testid*="_cyclist"] {{ --primary-color: {COLOR_SAFETY}; }}
+        /* Define the primary color variables for each slider type based on its key */
+        div[data-testid*="_policy"] {{ --slider-color: {COLOR_POLICY}; }}
+        div[data-testid*="_driver"] {{ --slider-color: {COLOR_TIME}; }}
+        div[data-testid*="_cyclist"] {{ --slider-color: {COLOR_SAFETY}; }}
         
-        /* General slider track (the colored part) */
-        div.stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
-            background-color: var(--primary-color) !important;
+        /* 1. Target the slider's track (the filled part) */
+        div.stSlider > div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
+            background-color: var(--slider-color) !important;
         }}
         
-        /* General slider thumb (the circle) */
+        /* 2. Target the slider's thumb (the circle) */
         div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
+            background-color: var(--slider-color) !important;
+            border-color: var(--slider-color) !important;
+        }}
+
+        /* 3. Target the slider's border (the gray line) - often needed to make the color complete */
+        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"]::before {{
+            border: 1px solid var(--slider-color) !important;
         }}
     </style>
     """
@@ -2764,11 +2773,11 @@ def set_slider_colors():
 set_slider_colors()
 
 
-# --- Helper Function for Stacked Bar (Native Altair - FIX for LayerChart Error) ---
+# --- Helper Function for Stacked Bar (Native Altair - FINAL FIX for Overlap) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
     Creates a single, stacked bar using native Streamlit (Altair).
-    FIXED: Uses alt.layer() to combine charts correctly and resolves the TypeError.
+    FIXED: Adjusts legend placement to prevent overlap with the bar.
     """
     
     # 1. Prepare data in a pandas DataFrame format required by Altair
@@ -2793,7 +2802,7 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
         x2='y',
         y=alt.Y('constant:N', title=None, axis=None)
     ).properties(
-        width='container' # Use 'container' for dynamic width
+        width='container'
     )
 
     # --- Actual Stacked Bar (Foreground) ---
@@ -2804,20 +2813,22 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
         color=alt.Color('Category', 
                         scale=alt.Scale(domain=list(opacity_color_map.keys()), 
                                         range=list(opacity_color_map.values())),
+                        # FIX: Set the legend orientation to 'top' or specify offset
                         legend=alt.Legend(title="Weights", 
                                           orient="bottom", 
                                           columns=3,
-                                          labelFontSize=14)),
+                                          labelFontSize=14,
+                                          titlePadding=10, # Add padding below the title/bar
+                                          titleOrient='top')), # Keep title above legend items
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
-        width='container' # Use 'container' for dynamic width
+        width='container'
     )
     
-    # --- Layer the charts using alt.layer() ---
-    # This is the correct way to combine charts and avoid the LayerChart error.
+    # FIX: Increase the total height of the layered chart to provide ample space for the legend.
     final_chart = alt.layer(background_bar, stacked_chart).resolve_scale(
-        y='independent' # Ensure both layers use the same y-scale
-    ).properties(height=100) # Set height for the final combined chart (gives extra room for legend)
+        y='independent' 
+    ).properties(height=100) 
     
     st.altair_chart(final_chart, use_container_width=True)
 
@@ -2946,6 +2957,8 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
+
+
 
 st.header("Step 2: Choose Evaluator Weights")
 st.write(
