@@ -2715,9 +2715,8 @@ import streamlit as st
 import numpy as np # Used for the more robust sum check
 
 # Set a wide layout for better bar visibility
-st.set_page_config(layout="wide")
 
-
+# --- Helper Function for Stacked Bar ---
 # --- Helper Function for Stacked Bar ---
 def stacked_weight_bar(yyy, xxx, zzz, is_valid):
     """
@@ -2741,6 +2740,7 @@ def stacked_weight_bar(yyy, xxx, zzz, is_valid):
     p_zzz = zzz * 100
     
     # Opacity for "grey out" effect
+    # The bar is dimmed if the weights don't sum to 1.0
     opacity = 1.0 if is_valid else 0.4
     
     # HTML structure for the stacked bar
@@ -2754,6 +2754,7 @@ def stacked_weight_bar(yyy, xxx, zzz, is_valid):
         transition: opacity 0.3s ease-in-out; 
         display: flex;
         width: 100%;
+        border: 1px solid #ddd;
     ">
         <div title="Policy: {p_yyy:.1f}%" style="
             width: {p_yyy}%; 
@@ -2808,16 +2809,15 @@ def create_trajectory_sliders(
     
     st.subheader(f"Trajectory {trajectory_number}")
     
-    # This st.write is redundant if the stacked bar shows the values, but keeping it
-    # as per original structure.
-    st.write(f"**Weights**: Policy: {initial_yyy*100:.0f}%, Time: {initial_xxx*100:.0f}%, Safety: {initial_zzz*100:.0f}%")
+    # The initial st.write is updated to show the preset weights clearly
+    st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
 
     # Use columns to put the bar next to the sliders for a neat layout
     col1, col2 = st.columns([1, 1])
 
     with col1:
         st.markdown(
-            f"Preset weights: **Policymaker**: {preset_policy_label}%, **Driver**: {preset_driver_label}%, **Cyclist**: {preset_cyclist_label}%"
+            f"Set your weights below:"
         )
         
         # Policy Slider (yyy)
@@ -2850,21 +2850,25 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_cyclist",
         )
         
-    # Validation Check (use numpy.isclose for robust floating-point comparison)
-    is_valid = np.isclose(yyy + xxx + zzz, 1.0)
+    # Validation Check: Use numpy.isclose for robust floating-point comparison
+    total_sum = yyy + xxx + zzz
+    is_valid = np.isclose(total_sum, 1.0)
 
     with col2:
-        st.markdown("### Weight Distribution", help="This single bar represents the proportions of Policy (Green), Time Efficiency (Blue), and Cyclist Safety (Red).")
+        st.markdown("### Current Weight Distribution")
         # Display the Stacked Bar
         stacked_weight_bar(yyy, xxx, zzz, is_valid)
         
+        # Display the error message only if invalid
         if not is_valid:
-            st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(yyy + xxx + zzz))
+            st.error("The weights must sum to 1.0 (currently sum to: {:.2f})".format(total_sum))
+        else:
+            st.success("Weights sum to 1.0! Current Policy: {:.2f}, Time: {:.2f}, Safety: {:.2f}".format(yyy, xxx, zzz))
 
     return yyy, xxx, zzz
 
 # -----------------------------------------------------
-# --- MAIN APPLICATION CALLS ---
+# --- MAIN APPLICATION CALLS (Maintaining original variable names) ---
 # -----------------------------------------------------
 
 # --- Trajectory 1 ---
