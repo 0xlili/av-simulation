@@ -497,10 +497,10 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
 
     # Define trajectory types for subtitles
     trajectory_descriptions = {
-        0: "Trajectory 1",
-        1: "Trajectory 2",
-        2: "Trajectory 3",
-        3: "Trajectory 4"
+        0: "Small-Gap Overtaking",
+        1: "Medium-Gap Overtaking",
+        2: "Large-Gap Overtaking",
+        3: "Conservative Following"
     }
 
     # Only use up to 4 trajectories
@@ -2711,116 +2711,93 @@ st.write(
     "The bars below show the current weight mix used to generate each path. These are example presets only. **T1** is fixed as the conservative baseline (100% policy). The weights for each trajectory always sum to 100%. Move the sliders for Policy, Time, and Safety to set your own weights."
 )
 
-st.subheader("Trajectory 1")
-st.write("**Weights**: Policy: 100%, Time: 0%, Safety: 0%")
-with st.container():
-    st.markdown("Preset weights: **Policymaker**: 100%, **Driver**: 0%, **Cyclist**: 0%")
-    yyy0 = st.slider(
-        "Policy", 
-        min_value=0.0, 
-        max_value=1.0, 
-        value=1.0, 
-        step=0.01, 
-        key="T1_policy"
+import plotly.graph_objects as go
+
+def make_sliders(traj_name, preset_text, default_policy, default_time, default_cyclist, key_prefix):
+    st.subheader(traj_name)
+    st.markdown(preset_text)
+    yyy = st.slider(
+        "Policy",
+        min_value=0.0,
+        max_value=1.0,
+        value=default_policy,
+        step=0.01,
+        key=f"{key_prefix}_policy"
     )
-    xxx0 = st.slider(
+    xxx = st.slider(
         "Time Efficiency",
         min_value=0.0,
         max_value=1.0,
-        value=0.0,
+        value=default_time,
         step=0.01,
-        key="T1_driver",
+        key=f"{key_prefix}_driver",
     )
-    zzz0 = st.slider(
+    zzz = st.slider(
         "Cyclist Safety",
         min_value=0.0,
         max_value=1.0,
-        value=0.0,
+        value=default_cyclist,
         step=0.01,
-        key="T1_cyclist",
+        key=f"{key_prefix}_cyclist",
     )
-    if not (xxx0 + yyy0 + zzz0 == 1.0):
+
+    if not (round(xxx + yyy + zzz, 2) == 1.0):
         st.error("The weights must sum to 1.0")
 
-st.subheader("Trajectory 2")
-with st.container():
-    st.markdown("Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%")
-    yyy1 = st.slider(
-        "Policy", 
-        min_value=0.0, 
-        max_value=1.0, 
-        value=0.5, 
-        step=0.01, 
-        key="T2_policy"
+    # Animated colored bars
+    fig = go.Figure(go.Bar(
+        x=[yyy, xxx, zzz],
+        y=["Policy", "Time", "Cyclist"],
+        orientation="h",
+        marker=dict(color=["green", "blue", "red"]),
+    ))
+    fig.update_layout(
+        xaxis=dict(range=[0, 1]),
+        transition_duration=500,
+        height=300,
+        margin=dict(l=100, r=20, t=20, b=20)
     )
-    xxx1 = st.slider(
-        "Time Efficiency",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.0,
-        step=0.01,
-        key="T2_driver",
-    )
-    zzz1 = st.slider(
-        "Cyclist Safety",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.5,
-        step=0.01,
-        key="T2_cyclist",
-    )
-    if not (xxx1 + yyy1 + zzz1 == 1.0):
-        st.error("The weights must sum to 1.0")
+    st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("Trajectory 3")
-with st.container():
-    st.markdown("Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%")
-    yyy2 = st.slider(
-        "Policy", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="T3_policy"
-    )
-    xxx2 = st.slider(
-        "Time Efficiency",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.5,
-        step=0.01,
-        key="T3_driver",
-    )
-    zzz2 = st.slider(
-        "Cyclist Safety",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.5,
-        step=0.01,
-        key="T3_cyclist",
-    )
-    if not (xxx2 + yyy2 + zzz2 == 1.0):
-        st.error("The weights must sum to 1.0")
+    return yyy, xxx, zzz
 
-st.subheader("Trajectory 4")
-with st.container():
-    st.markdown("Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%")
-    yyy3 = st.slider(
-        "Policy", min_value=0.0, max_value=1.0, value=0.4, step=0.01, key="T4_policy"
-    )
-    xxx3 = st.slider(
-        "Time Efficiency",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.4,
-        step=0.01,
-        key="T4_driver",
-    )
-    zzz3 = st.slider(
-        "Cyclist Safety",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.2,
-        step=0.01,
-        key="T4_cyclist",
-    )
-    if not (xxx3 + yyy3 + zzz3 == 1.0):
-        st.error("The weights must sum to 1.0")
+# ---- Call your sliders for each trajectory ----
+yyy0, xxx0, zzz0 = make_sliders(
+    "Trajectory 1",
+    "Preset weights: **Policymaker**: 100%, **Driver**: 0%, **Cyclist**: 0%",
+    default_policy=1.0,
+    default_time=0.0,
+    default_cyclist=0.0,
+    key_prefix="T1"
+)
+
+yyy1, xxx1, zzz1 = make_sliders(
+    "Trajectory 2",
+    "Preset weights: **Policymaker**: 50%, **Driver**: 0%, **Cyclist**: 50%",
+    default_policy=0.5,
+    default_time=0.0,
+    default_cyclist=0.5,
+    key_prefix="T2"
+)
+
+yyy2, xxx2, zzz2 = make_sliders(
+    "Trajectory 3",
+    "Preset weights: **Policymaker**: 0%, **Driver**: 50%, **Cyclist**: 50%",
+    default_policy=0.0,
+    default_time=0.5,
+    default_cyclist=0.5,
+    key_prefix="T3"
+)
+
+yyy3, xxx3, zzz3 = make_sliders(
+    "Trajectory 4",
+    "Preset weights: **Policymaker**: 40%, **Driver**: 40%, **Cyclist**: 20%",
+    default_policy=0.4,
+    default_time=0.4,
+    default_cyclist=0.2,
+    key_prefix="T4"
+)
+
 
 
 st.header("Step 2: Choose Evaluator Weights")
