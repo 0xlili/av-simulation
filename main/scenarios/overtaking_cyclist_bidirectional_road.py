@@ -2742,35 +2742,51 @@ COLOR_MAP = {
 # Inject custom CSS to change slider thumb and track colors
 def set_slider_colors():
     """Injects CSS to customize the appearance of the st.slider component based on key."""
+    # Using specific selectors and !important for highest priority
     css = f"""
     <style>
-        /* Target the specific slider keys and apply colors */
-        
-        /* Policy Sliders (Green) */
-        div[data-testid*="T1_policy"], div[data-testid*="T2_policy"], div[data-testid*="T3_policy"], div[data-testid*="T4_policy"] {{
-            --primary-color: {COLOR_POLICY}; 
+        /* Define the custom colors for each role */
+        .policy-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+            background-color: {COLOR_POLICY} !important;
         }}
-        
-        /* Time Efficiency Sliders (Blue) */
-        div[data-testid*="T1_driver"], div[data-testid*="T2_driver"], div[data-testid*="T3_driver"], div[data-testid*="T4_driver"] {{
-            --primary-color: {COLOR_TIME}; 
-        }}
-        
-        /* Cyclist Safety Sliders (Red) */
-        div[data-testid*="T1_cyclist"], div[data-testid*="T2_cyclist"], div[data-testid*="T3_cyclist"], div[data-testid*="T4_cyclist"] {{
-            --primary-color: {COLOR_SAFETY}; 
+        .policy-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
+            background-color: {COLOR_POLICY} !important;
+            border-color: {COLOR_POLICY} !important;
         }}
 
-        /* General slider track (the colored part) */
-        div.stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+        .time-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+            background-color: {COLOR_TIME} !important;
+        }}
+        .time-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
+            background-color: {COLOR_TIME} !important;
+            border-color: {COLOR_TIME} !important;
+        }}
+
+        .safety-slider .stSlider > div[data-baseweb="slider"] div[style*="background-color"] {{
+            background-color: {COLOR_SAFETY} !important;
+        }}
+        .safety-slider .stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
+            background-color: {COLOR_SAFETY} !important;
+            border-color: {COLOR_SAFETY} !important;
+        }}
+
+        /* Ensure the main container holding the slider is tagged with the class */
+        /* This requires wrapping the slider in st.markdown to inject the class,
+           which is necessary for the CSS to work when direct data-testid selectors fail.
+           However, let's try a simpler approach first by only relying on st.markdown
+           to inject the general slider styles which sometimes works better.
+        */
+
+        /* Fallback: General track and thumb color override using a stronger selector */
+        div[data-testid^="stHorizontalBlock"] div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
             background-color: var(--primary-color) !important;
         }}
         
-        /* General slider thumb (the circle) */
-        div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"] {{
-            background-color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
-        }}
+        /* Define the variables on the element above the slider */
+        div[data-testid*="_policy"] {{ --primary-color: {COLOR_POLICY}; }}
+        div[data-testid*="_driver"] {{ --primary-color: {COLOR_TIME}; }}
+        div[data-testid*="_cyclist"] {{ --primary-color: {COLOR_SAFETY}; }}
+
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -2779,11 +2795,11 @@ def set_slider_colors():
 set_slider_colors()
 
 
-# --- Helper Function for Stacked Bar (Native Altair) ---
+# --- Helper Function for Stacked Bar (Native Altair - FIX) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
     Creates a single, stacked bar using native Streamlit (Altair).
-    Bar height is increased via the 'height' property.
+    FIXED: Uses a proper x-scale to ensure the bar fills the width.
     """
     
     # 1. Prepare data in a pandas DataFrame format required by Altair
@@ -2793,22 +2809,32 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     })
     
     # 2. Determine Opacity/Color for "Grey Out"
-    # Adjust the color domain to grey if invalid.
     opacity_color_map = {
         f"{EMOJI_POLICY} Policy": COLOR_POLICY if is_valid else "#808080",
         f"{EMOJI_TIME} Time Efficiency": COLOR_TIME if is_valid else "#808080",
         f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY if is_valid else "#808080"
     }
+    
+    # The bar that fills the entire width (total = 1.0)
+    background_bar = alt.Chart(pd.DataFrame({'x': [0], 'y': [1]})).mark_bar(
+        color='#333333', 
+        height=60
+    ).encode(
+        x=alt.X('x', scale=alt.Scale(domain=[0, 1]), axis=None),
+        x2='y',
+        y=alt.Y('constant:N', title=None, axis=None)
+    )
 
-    # 3. Create the Altair Stacked Bar Chart
-    chart = alt.Chart(data).mark_bar().encode(
-        # The x-axis shows the weight (sum should be 1.0)
-        x=alt.X('Weight', axis=None), 
+    # The actual stacked bar
+    stacked_chart = alt.Chart(data).mark_bar(height=60).encode(
+        # The x-axis is set from 0 to 1 to ensure full width
+        x=alt.X('Weight', axis=None, stack="normalize"), 
         
-        # The y-axis is a constant to force a single bar
+        # This is the key change: setting stack="normalize" tells Altair to treat the 
+        # sum of 'Weight' as 100% of the bar width.
+        
         y=alt.Y('constant:N', title=None, axis=None), 
         
-        # The color is based on the category, using the conditional color map
         color=alt.Color('Category', 
                         scale=alt.Scale(domain=list(opacity_color_map.keys()), 
                                         range=list(opacity_color_map.values())),
@@ -2816,17 +2842,20 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
                                           orient="bottom", 
                                           columns=3,
                                           labelFontSize=14)),
-        # Tooltip for better interactivity
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
-        # Increase the bar height here (was 30)
+        # Increase the bar height here
         height=60
     ).configure_view(
-        # Remove border around the chart
         strokeWidth=0
     )
     
-    st.altair_chart(chart, use_container_width=True)
+    # Combine the background and the foreground stacked chart
+    final_chart = (background_bar + stacked_chart).resolve_scale(
+        y='independent' # Ensure both layers use the same y-scale
+    ).properties(height=60) # Set height for the final combined chart
+    
+    st.altair_chart(final_chart, use_container_width=True)
 
 
 # --- Main Slider Function ---
@@ -2847,7 +2876,6 @@ def create_trajectory_sliders(
     
     st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
 
-    # Use columns to put the bar next to the sliders for a neat layout
     col1, col2 = st.columns([1, 1])
 
     with col1:
@@ -2855,7 +2883,7 @@ def create_trajectory_sliders(
             f"Set your weights below:"
         )
         
-        # Policy Slider (yyy) - now with EMOJI
+        # Policy Slider (yyy) 
         yyy = st.slider(
             f"{EMOJI_POLICY} Policy", 
             min_value=0.0, 
@@ -2865,7 +2893,7 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_policy"
         )
         
-        # Time Efficiency Slider (xxx) - now with EMOJI
+        # Time Efficiency Slider (xxx) 
         xxx = st.slider(
             f"{EMOJI_TIME} Time Efficiency",
             min_value=0.0,
@@ -2875,7 +2903,7 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_driver",
         )
         
-        # Cyclist Safety Slider (zzz) - now with EMOJI
+        # Cyclist Safety Slider (zzz) 
         zzz = st.slider(
             f"{EMOJI_SAFETY} Cyclist Safety",
             min_value=0.0,
@@ -2885,7 +2913,6 @@ def create_trajectory_sliders(
             key=f"T{trajectory_number}_cyclist",
         )
         
-    # Validation Check: Use numpy.isclose for robust floating-point comparison
     total_sum = yyy + xxx + zzz
     is_valid = np.isclose(total_sum, 1.0)
 
@@ -2955,7 +2982,6 @@ yyy3, xxx3, zzz3 = create_trajectory_sliders(
     preset_driver_label=40,
     preset_cyclist_label=20,
 )
-
 
 
 st.header("Step 2: Choose Evaluator Weights")
