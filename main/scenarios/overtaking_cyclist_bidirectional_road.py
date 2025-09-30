@@ -2719,7 +2719,7 @@ import altair as alt
 # --- Configuration and Styles ---
 
 # Set a wide layout
-st.set_page_config(layout="wide", page_title="Trajectory Weight Simulator")
+st.set_page_config(layout="wide", page_title="Weight Trajectory Configurator")
 
 # Define colors and emojis
 COLOR_POLICY = "#4CAF50"  # Green ⚖️
@@ -2736,55 +2736,60 @@ COLOR_MAP = {
     f"{EMOJI_SAFETY} Cyclist Safety": COLOR_SAFETY
 }
 
+# --- CSS Injection (Single Function) ---
 
-def set_slider_colors(key, color, value):
+def set_styles(slider_key, color, value):
     """
     Injects highly specific CSS to force a custom color on the slider track and cursor
-    using the linear-gradient technique, which is more reliable than overriding Streamlit's
-    internal variables. This function must be called for EVERY slider.
+    using the linear-gradient technique, applied immediately on render.
     """
-    # Streamlit uses the key to create a unique data-testid for the slider container
+    # Use the value from session_state for reliability, but fall back to the provided 'value'
+    current_value = st.session_state.get(slider_key, value)
     
-    # 1. Slider Track Color (using linear-gradient)
-    # The 'value' is used to define where the colored part ends and the gray part begins.
-    # We use the slider's key to target its specific track.
+    # Define track color using linear-gradient
     track_css = f'''
     <style> 
         /* Target the specific slider's track based on key */
-        div[data-testid*="{key}"] div.stSlider > div[data-baseweb = "slider"] > div > div {{
+        div[data-testid*="{slider_key}"] div.stSlider > div[data-baseweb = "slider"] > div > div {{
             background: linear-gradient(to right, {color} 0%,  
-                                                {color} {value*100}%, 
-                                                rgba(151, 166, 195, 0.25) {value*100}%, 
+                                                {color} {current_value*100}%, 
+                                                rgba(151, 166, 195, 0.25) {current_value*100}%, 
                                                 rgba(151, 166, 195, 0.25) 100%) !important;
         }} 
     </style>'''
     st.markdown(track_css, unsafe_allow_html=True)
     
-    # 2. Slider Cursor Color
+    # Slider Cursor Color
     cursor_css = f'''
     <style> 
         /* Target the specific slider's cursor based on key */
-        div[data-testid*="{key}"] div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"]{{
+        div[data-testid*="{slider_key}"] div.stSlider > div[data-baseweb="slider"] div[data-baseweb="slider-handle"]{{
             background-color: {color} !important; 
             border-color: {color} !important;
-            box-shadow: {color}40 0px 0px 0px 0.2rem !important; /* Adding a subtle glow effect */
+            box-shadow: {color}40 0px 0px 0px 0.2rem !important;
         }} 
     </style>'''
     st.markdown(cursor_css, unsafe_allow_html=True)
-    
-    # 3. Fix for the slider's background color on the left side (if it's white/light)
-    # This is often needed in dark mode when the linear gradient isn't perfect
-    fill_css = f'''
-    <style>
-        div[data-testid*="{key}"] div.stSlider > div[data-baseweb="slider"] div[style*="background-color: rgb(255, 127, 80)"] {{
-            background-color: {color} !important;
-        }}
-    </style>
-    '''
-    st.markdown(fill_css, unsafe_allow_html=True)
+
+# --- Initial State Setup (CRITICAL FIX for initial overlap) ---
+# Initialize session state with the preset values if not already present.
+# This ensures the Altair chart draws immediately with the correct proportions.
+
+def initialize_session_state():
+    presets = {
+        "T1_policy": 1.0, "T1_driver": 0.0, "T1_cyclist": 0.0,
+        "T2_policy": 0.5, "T2_driver": 0.0, "T2_cyclist": 0.5,
+        "T3_policy": 0.0, "T3_driver": 0.5, "T3_cyclist": 0.5,
+        "T4_policy": 0.4, "T4_driver": 0.4, "T4_cyclist": 0.2,
+    }
+    for key, value in presets.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+initialize_session_state()
 
 
-# --- Helper Function for Stacked Bar (Native Altair - FINAL) ---
+# --- Helper Function for Stacked Bar (Native Altair) ---
 def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     """
     Creates a single, thick, stacked bar using native Streamlit (Altair).
@@ -2806,7 +2811,7 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
     # --- Background Bar (Full Width) ---
     background_bar = alt.Chart(pd.DataFrame({'x': [0], 'y': [1]})).mark_bar(
         color='#333333', 
-        height=60 # Thicker bar height
+        height=60
     ).encode(
         x=alt.X('x', scale=alt.Scale(domain=[0, 1]), axis=None),
         x2='y',
@@ -2827,24 +2832,24 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
                                           orient="bottom", 
                                           columns=3,
                                           labelFontSize=14,
-                                          titlePadding=0, # Removed padding as we are adding a break line
+                                          titlePadding=0,
                                           titleOrient='top')),
         tooltip=['Category', alt.Tooltip('Weight', format='.1%')]
     ).properties(
         width='container'
     )
     
-    # Combine charts and set total height
     final_chart = alt.layer(background_bar, stacked_chart).resolve_scale(
         y='independent' 
-    ).properties(height=100) # Set height for the final combined chart
+    ).properties(height=100)
     
     st.altair_chart(final_chart, use_container_width=True)
 
 
-# --- Main Slider Function ---
+# --- Main Slider Function (UPDATED) ---
 def create_trajectory_sliders(
-    trajectory_number, 
+    title, # New parameter: full title string
+    key_prefix, # New parameter for unique keys (e.g., "T1")
     initial_yyy, 
     initial_xxx, 
     initial_zzz, 
@@ -2856,11 +2861,16 @@ def create_trajectory_sliders(
     Creates the sliders, validation, and stacked animated bar for a single trajectory.
     """
     
-    st.subheader(f"Trajectory {trajectory_number}")
+    st.subheader(title) # Use the full title here
     
     st.write(f"**Preset Weights**: Policy: {preset_policy_label}%, Time: {preset_driver_label}%, Safety: {preset_cyclist_label}%")
 
     col1, col2 = st.columns([1, 1])
+    
+    # Define full keys
+    key_policy = f"{key_prefix}_policy"
+    key_driver = f"{key_prefix}_driver"
+    key_cyclist = f"{key_prefix}_cyclist"
 
     with col1:
         st.markdown(
@@ -2874,10 +2884,10 @@ def create_trajectory_sliders(
             max_value=1.0, 
             value=initial_yyy, 
             step=0.01, 
-            key=f"T{trajectory_number}_policy"
+            key=key_policy # Use the constructed key
         )
-        # FIX: Call the CSS injector with the current value
-        set_slider_colors(f"T{trajectory_number}_policy", COLOR_POLICY, yyy)
+        # Call CSS injector
+        set_styles(key_policy, COLOR_POLICY, initial_yyy)
         
         # Time Efficiency Slider (xxx) 
         xxx = st.slider(
@@ -2886,10 +2896,10 @@ def create_trajectory_sliders(
             max_value=1.0,
             value=initial_xxx,
             step=0.01,
-            key=f"T{trajectory_number}_driver",
+            key=key_driver
         )
-        # FIX: Call the CSS injector with the current value
-        set_slider_colors(f"T{trajectory_number}_driver", COLOR_TIME, xxx)
+        # Call CSS injector
+        set_styles(key_driver, COLOR_TIME, initial_xxx)
         
         # Cyclist Safety Slider (zzz) 
         zzz = st.slider(
@@ -2898,10 +2908,10 @@ def create_trajectory_sliders(
             max_value=1.0,
             value=initial_zzz,
             step=0.01,
-            key=f"T{trajectory_number}_cyclist",
+            key=key_cyclist
         )
-        # FIX: Call the CSS injector with the current value
-        set_slider_colors(f"T{trajectory_number}_cyclist", COLOR_SAFETY, zzz)
+        # Call CSS injector
+        set_styles(key_cyclist, COLOR_SAFETY, initial_zzz)
         
     total_sum = yyy + xxx + zzz
     is_valid = np.isclose(total_sum, 1.0)
@@ -2909,7 +2919,7 @@ def create_trajectory_sliders(
     with col2:
         st.markdown("### Current Weight Distribution")
         
-        # FIX: Force a break line for separation
+        # Force space with a break line
         st.markdown("<br>", unsafe_allow_html=True)
         
         # Display the Stacked Bar using native Altair
@@ -2924,23 +2934,47 @@ def create_trajectory_sliders(
     return yyy, xxx, zzz
 
 # -----------------------------------------------------
-# --- MAIN APPLICATION CALLS (Using original variable names) ---
+# --- MAIN APPLICATION CALLS (Using updated parameters) ---
 # -----------------------------------------------------
 
 # --- Trajectory 1 ---
-yyy0, xxx0, zzz0 = create_trajectory_sliders(1, 1.0, 0.0, 0.0, 100, 0, 0)
+yyy0, xxx0, zzz0 = create_trajectory_sliders(
+    title="Trajectory 1",
+    key_prefix="T1",
+    initial_yyy=1.0, initial_xxx=0.0, initial_zzz=0.0,
+    preset_policy_label=100, preset_driver_label=0, preset_cyclist_label=0,
+)
+
 st.divider()
 
 # --- Trajectory 2 ---
-yyy1, xxx1, zzz1 = create_trajectory_sliders(2, 0.5, 0.0, 0.5, 50, 0, 50)
+yyy1, xxx1, zzz1 = create_trajectory_sliders(
+    title="Trajectory 2",
+    key_prefix="T2",
+    initial_yyy=0.5, initial_xxx=0.0, initial_zzz=0.5,
+    preset_policy_label=50, preset_driver_label=0, preset_cyclist_label=50,
+)
+
 st.divider()
 
 # --- Trajectory 3 ---
-yyy2, xxx2, zzz2 = create_trajectory_sliders(3, 0.0, 0.5, 0.5, 0, 50, 50)
+yyy2, xxx2, zzz2 = create_trajectory_sliders(
+    title="Trajectory 3",
+    key_prefix="T3",
+    initial_yyy=0.0, initial_xxx=0.5, initial_zzz=0.5,
+    preset_policy_label=0, preset_driver_label=50, preset_cyclist_label=50,
+)
+
 st.divider()
 
 # --- Trajectory 4 ---
-yyy3, xxx3, zzz3 = create_trajectory_sliders(4, 0.4, 0.4, 0.2, 40, 40, 20)
+yyy3, xxx3, zzz3 = create_trajectory_sliders(
+    title="Trajectory 4",
+    key_prefix="T4",
+    initial_yyy=0.4, initial_xxx=0.4, initial_zzz=0.2,
+    preset_policy_label=40, preset_driver_label=40, preset_cyclist_label=20,
+)
+
 
 
 
