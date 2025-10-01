@@ -510,7 +510,7 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
     trajectories_full = trajectories_full[:max_trajectories]
 
     # Colors for different trajectories with better visibility
-    colors = ['#BF00C0', '#000000', '#FF0000', '#0000FF']
+    colors = ['#0000FF', '#000000', '#FF0000', '#BF00C0']
     line_styles = ['--', '-.', '-', '--']  # Cycle through styles
     line_widths = [2.0, 2.0, 2.0, 2.0]  # Consistent widths
 
