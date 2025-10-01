@@ -3111,6 +3111,13 @@ with st.expander("Expand to edit simulation parameters"):
     scenario_dt = st.number_input("DT (Time step)", value=0.1, step=0.01)
     scenario_centerline_location = st.number_input("CENTERLINE_LOCATION", value=0.0, step=0.1)
     scenario_length = st.number_input("LENGTH (Length of scenario)", value=44.0, step=1.0)
+    scenario_width_road = st.number_input("WIDTH_ROAD", value=4.0, step=0.1)
+    scenario_x_loc_goal = st.number_input("X_LOC_GOAL", value=2.0, step=0.1)
+    scenario_y_loc_goal = st.number_input("Y_LOC_GOAL", value=22.0, step=1.0)
+    scenario_x_loc_ego = st.number_input("X_LOC_EGO", value=2.0, step=0.1)
+    scenario_x_loc_cyclist_buffer = st.number_input("X_LOC_CYCLIST_BUFFER", value=1.6, step=0.1)
+    scenario_y_loc_cyclist_buffer = st.number_input("Y_LOC_CYCLIST_BUFFER", value=9.7, step=0.1)
+    
     st.markdown("---")
 
     # ReasonParameters
@@ -3209,6 +3216,12 @@ if st.button("Run Simulation",
         'scenario_dt': scenario_dt,
         'scenario_centerline_location': scenario_centerline_location,
         'scenario_length': scenario_length,
+        'scenario_width_road': ,
+        'x_loc_goal': x_loc_goal,
+        'y_loc_goal': y_loc_goal,
+        'x_loc_ego': x_loc_ego,
+        'x_loc_cyclist_buffer': x_loc_cyclist_buffer,
+        'y_loc_cyclist_buffer': y_loc_cyclist_buffer,
         'reasons_threshold': reasons_threshold,
         'mpc_time_horizon': mpc_time_horizon,
         'mpc_frame_window': mpc_frame_window,
@@ -3222,9 +3235,9 @@ if st.button("Run Simulation",
         'cyclist_speed': cyclist_speed,
     }
 
-    # Update parameters file before running the simulation
-    # update_parameters_file(params_to_update)
-    # st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
+    Update parameters file before running the simulation
+    update_parameters_file(params_to_update)
+    st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
     
     import lib.parameters
     importlib.reload(lib.parameters)
