@@ -2646,14 +2646,27 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
             st.subheader("⚙ Results ")
             if output_video_path.exists():
                 
-
-                st.subheader("1. Generated trajectories from Step 1")
-                st.image(str(trajectory_evaluation_spatial), caption="Spatial Trajectory Evaluation")
-                st.subheader("2. Evaluation results of three trajectories from Step 2")
-                st.image(str(trajectory_evaluations_trajectories), caption="Trajectory Evaluation")
-                st.subheader("3. A video showing how the AV makes decisiosn that respect human reasons according to the weights you set")
-
-                st.video(str(output_video_path))
+                # 1. Create three columns with equal width (1, 1, 1)
+                col1, col2, col3 = st.columns(3)
+                
+                # --- Column 1: Spatial Trajectory Evaluation ---
+                with col1:
+                    st.subheader("1. Generated Trajectories from Step 1")
+                    # Use st.image for the figure
+                    st.image(str(trajectory_evaluation_spatial), caption="Spatial Trajectory Evaluation")
+                    
+                # --- Column 2: Trajectory Evaluation Results ---
+                with col2:
+                    st.subheader("2. Evaluation Results of Three Trajectories from Step 2")
+                    # Use st.image for the figure
+                    st.image(str(trajectory_evaluations_trajectories), caption="Trajectory Evaluation")
+                    
+                # --- Column 3: Output Video ---
+                with col3:
+                    st.subheader("3. AV Decision Video")
+                    st.write("A video showing how the AV makes decisions that respect human reasons according to the weights you set")
+                    # Use st.video for the video
+                    st.video(str(output_video_path))
 
             else:
                 st.error("Video generation failed. Make sure the simulation produced frames.")
@@ -3180,10 +3193,28 @@ if st.button("Run Simulation",
     </iframe>
     """
     with st.expander("See Default Outputs"):
-        # --- Default Outputs ---
-        st.video(str(video_path))
-        st.image(str(spatial_image_path), caption="Spatial Trajectory Evaluation")
-        st.image(str(trajectory_image_path), caption="Trajectory Evaluation")
+        
+        # Create three columns with equal width (1, 1, 1) inside the expander
+        col1, col2, col3 = st.columns(3)
+        
+        # --- Column 1: Spatial Trajectory Evaluation ---
+        with col1:
+            st.subheader("1. Generated Trajectories from Step 1")
+            # Display the spatial image
+            st.image(str(spatial_image_path), caption="Spatial Trajectory Evaluation")
+            
+        # --- Column 2: Trajectory Evaluation Results ---
+        with col2:
+            st.subheader("2. Evaluation Results of Three Trajectories from Step 2")
+            # Display the trajectory image
+            st.image(str(trajectory_image_path), caption="Trajectory Evaluation")
+            
+        # --- Column 3: Output Video ---
+        with col3:
+            st.subheader("3. AV Decision Video")
+            st.write("A video showing how the AV makes decisions that respect human reasons according to the weights you set")
+            # Display the video
+            st.video(str(video_path))
 
     components.html(dino_html, height=500)
     ignoree = Path(__file__).resolve().parent
