@@ -2608,7 +2608,7 @@ def run_simulation(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight
     # If not, you must fix the code inside main() to use this folder.
     
     # Run the simulation
-    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False, historical_plot=Fale, save_path=results_folder)
+    main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, ideal_weight_driver, ideal_weight_policymaker, xxx0, xxx1, xxx2, xxx3, yyy0, yyy1, yyy2, yyy3, zzz0, zzz1, zzz2, zzz3, replanner=True, vis_frame=True, save_weight_table=False, historical_plot=False, save_path=results_folder)
     
     # --- START OF DIAGNOSTIC BLOCK ---
     st.info("Checking for generated frames...")
