@@ -3155,7 +3155,8 @@ with st.expander("Expand to edit simulation parameters"):
 #         key="main_run_button"
 #     )
 if st.button("Run Simulation",
-            disabled=not (is_evaluator_valid and is_evaluator_valid0 and is_evaluator_valid1 and is_evaluator_valid2 and is_evaluator_valid3)):
+            disabled=not (is_evaluator_valid and is_evaluator_valid0 and is_evaluator_valid1 and is_evaluator_valid2 and is_evaluator_valid3),
+            type="primary"):
     st.info("Running simulation...")
     
     # Replace the video with an embedded Dino game clone
