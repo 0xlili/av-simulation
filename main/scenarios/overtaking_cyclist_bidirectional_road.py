@@ -3106,8 +3106,8 @@ if st.button("Run Simulation"):
     }
 
     # Update parameters file before running the simulation
-    update_parameters_file(params_to_update)
-    st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
+    # update_parameters_file(params_to_update)
+    # st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
     
     import lib.parameters
     importlib.reload(lib.parameters)
