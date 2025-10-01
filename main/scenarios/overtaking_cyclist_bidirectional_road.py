@@ -497,10 +497,10 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
 
     # Define trajectory types for subtitles
     trajectory_descriptions = {
-        0: "Small-Gap Overtaking",
-        1: "Medium-Gap Overtaking",
-        2: "Large-Gap Overtaking",
-        3: "Conservative Following"
+        0: "Conservative Following",
+        1: "Small-Gap Overtaking",
+        2: "Medium-Gap Overtaking",
+        3: "Large-Gap Overtaking"
     }
 
     # Only use up to 4 trajectories
@@ -768,7 +768,7 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
             linestyle=style,
             linewidth=width * 2,  # Make lines thicker for better visibility
             #label=f"Traj {i}: {traj_description} (Score: {score:.3f})"  # Enhanced label
-            label=f"Trajectory {i+1}"  # Enhanced label
+            label=f"Trajectory {i+1} \n {traj_description} \n"  # Enhanced label
         )
 
     goal_x, goal_y = ScenarioParameters.X_LOC_GOAL, ScenarioParameters.Y_LOC_GOAL
