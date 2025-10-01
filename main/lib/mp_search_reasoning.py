@@ -92,9 +92,9 @@ class MotionPrimitiveSearch:
         self._a_star: AStar[NodeType] = AStar(neighbor_function=self.neighbor_function)
         
         # Initialize high-level reasoning weights (as lists for multiple trajectory generation)
-        self._wh_ego_list = wh_ego if wh_ego else [yyy3, yyy0, yyy1, yyy2]
-        self._wh_policy_list = wh_policy if wh_policy else [xxx3, xxx0, xxx1, xxx2]
-        self._wh_rUser1_list = wh_rUser1 if wh_rUser1 else [zzz3, zzz0, zzz1, zzz2]
+        self._wh_ego_list = wh_ego if wh_ego else [yyy3, yyy2, yyy1, yyy0]
+        self._wh_policy_list = wh_policy if wh_policy else [xxx3, xxx2, xxx1, xxx0]
+        self._wh_rUser1_list = wh_rUser1 if wh_rUser1 else [zzz3, zzz2, zzz1, zzz0]
         self._wh_rUser2_list = wh_rUser2 if wh_rUser2 else [0.0, 0.0, 0.0]
         self._wh_rUser3_list = wh_rUser3 if wh_rUser3 else [0.0, 0.0, 0.0]
         
