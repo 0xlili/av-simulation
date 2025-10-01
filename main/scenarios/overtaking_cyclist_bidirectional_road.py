@@ -3235,7 +3235,7 @@ if st.button("Run Simulation",
         'cyclist_speed': cyclist_speed,
     }
 
-    Update parameters file before running the simulation
+    # Update parameters file before running the simulation
     update_parameters_file(params_to_update)
     st.success(f"Parameters in '{PARAMETERS_PATH.name}' updated successfully.")
     
