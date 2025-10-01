@@ -2719,7 +2719,7 @@ import altair as alt
 # --- Configuration and Styles ---
 
 # Set a wide layout
-st.set_page_config(layout="wide", page_title="Weight Trajectory Simulator")
+st.set_page_config(page_title="Weight Trajectory Simulator")
 
 # Define colors and emojis
 COLOR_POLICY = "#4CAF50"  # Green ⚖️
