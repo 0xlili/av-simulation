@@ -3072,13 +3072,13 @@ def create_weight_sliders(
 st.header("Step 1: Explore Preset Trajectories")
 
 # Use a custom key_suffix for the original four sets
-xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 2", 0.4, 0.4, 0.2, 50, 0, 50, key_suffix="T2")
+xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 1", 0.4, 0.4, 0.2, 50, 0, 50, key_suffix="T2")
 st.divider()
-xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 3", 0.5, 0.0, 0.5, 0, 50, 50, key_suffix="T3")
+xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 0, 50, 50, key_suffix="T3")
 st.divider()
-xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 4", 0.0, 0.5, 0.5, 40, 40, 20, key_suffix="T4")
+xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 40, 40, 20, key_suffix="T4")
 st.divider()
-xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
+xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 4", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
 st.divider()
 
 
