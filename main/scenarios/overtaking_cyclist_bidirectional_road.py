@@ -2005,7 +2005,7 @@ def initialize_simulation() -> tuple:
     scenario_visualization = arterial.create_scenario(frame_visualization=True)
 
     # Define moving obstacles
-    spawn_location_x = scenario_no_obstacles.start[0] + ScenarioParameters.X_LOC_CYCLIST_BUFFER
+    spawn_location_x = scenario_no_obstacles.start[0] + ScenarioParameters.DT
     spawn_location_y = scenario_no_obstacles.start[1] + ScenarioParameters.Y_LOC_CYCLIST_BUFFER
     moving_obstacles = [
         MovingObstacleArterial(bicycle_dimensions, spawn_location_x, spawn_location_y, speed = CyclistParameters.SPEED, initial_speed = CyclistParameters.SPEED, offset=True, dt=ScenarioParameters.DT)
