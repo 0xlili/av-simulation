@@ -2708,26 +2708,14 @@ st.markdown(
 
 import streamlit.components.v1 as components
 
-# --- Streamlit Application Setup ---
-
-st.set_page_config(layout="wide", page_title="Overtaking Trajectory Visualizer")
-
-st.markdown("""
-    # Dynamic Overtaking Trajectory Visualization
-    
-    The entire graphic, including its SVG and Tailwind CSS styling, is now embedded 
-    directly within this Streamlit Python file for easy deployment.
-""")
-
 # --- 1. Embedded HTML Content (SVG Graphic) ---
-# The complete HTML/SVG structure is stored in a Python triple-quoted string.
+# Content is minimized to focus on the graphic and legend only.
 html_content = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overtaking Trajectories</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -2749,15 +2737,12 @@ html_content = """
         .t-label { font-weight: bold; font-family: sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 flex items-start justify-center p-4 sm:p-8 min-h-screen font-sans">
-    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl max-w-5xl w-full">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 border-b pb-2">
-            Vehicle Overtaking Strategy Analysis
-        </h1>
-
-        <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
-            <!-- SVG Graphic Container -->
-            <div class="w-full lg:w-3/5 overflow-hidden border-2 border-gray-200 rounded-lg">
+<body class="bg-transparent flex items-start justify-center font-sans p-0 m-0">
+    <!-- Main content area, simplified for dashboard embedding -->
+    <div class="w-full">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+            <!-- SVG Graphic Container: Minimal border for clean separation -->
+            <div class="w-full lg:w-3/5 overflow-hidden border border-gray-100 rounded-md">
                 <!-- SVG Viewport: 800x350 -->
                 <svg viewBox="0 0 800 350" class="w-full h-auto">
 
@@ -2821,30 +2806,30 @@ html_content = """
             </div>
 
             <!-- Legend Container -->
-            <div class="w-full lg:w-2/5 flex flex-col justify-start space-y-3 p-4 bg-gray-50 rounded-xl">
-                <h2 class="text-xl font-semibold text-gray-700 mb-2">Legend</h2>
+            <div class="w-full lg:w-2/5 flex flex-col justify-start space-y-2 p-2 bg-gray-50 rounded-md text-sm">
+                <h2 class="text-lg font-semibold text-gray-700 mb-1">Legend</h2>
                 
                 <!-- Legend Item T1 -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-5 h-5 rounded-md color-legend-t1 shadow-md"></div>
+                    <div class="w-4 h-4 rounded-sm color-legend-t1"></div>
                     <span class="text-gray-700">Conservative following (T1)</span>
                 </div>
 
                 <!-- Legend Item T2 -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-5 h-5 rounded-md color-legend-t2 shadow-md"></div>
+                    <div class="w-4 h-4 rounded-sm color-legend-t2"></div>
                     <span class="text-gray-700">Small gap overtaking (T2)</span>
                 </div>
 
                 <!-- Legend Item T3 -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-5 h-5 rounded-md color-legend-t3 shadow-md"></div>
+                    <div class="w-4 h-4 rounded-sm color-legend-t3"></div>
                     <span class="text-gray-700">Medium gap overtaking (T3)</span>
                 </div>
 
                 <!-- Legend Item T4 -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-5 h-5 rounded-md color-legend-t4 shadow-md"></div>
+                    <div class="w-4 h-4 rounded-sm color-legend-t4"></div>
                     <span class="text-gray-700">Large gap overtaking (T4)</span>
                 </div>
             </div>
@@ -2855,12 +2840,16 @@ html_content = """
 """
 
 # 2. Embed the HTML content using components.html
-# The height is set to accommodate the SVG and the legend cleanly.
+# Reduced height (400px) and removed extra padding for a cleaner embed.
 components.html(
     html_content,
-    height=450,
+    height=400,
     scrolling=False
 )
+
+# 3. Add the requested caption
+st.caption("Figure 1: Comparison of Overtaking Trajectories (T2, T3, T4) and Conservative Following (T1).")
+
 
 st.subheader("Preset weights for T1-T4")
 st.write(
