@@ -2706,7 +2706,163 @@ st.markdown(
     """
 )
 
-st.subheader("Preset weights for T2-T4")
+import streamlit.components.v1 as components
+
+# --- Streamlit Application Setup ---
+
+st.set_page_config(layout="wide", page_title="Overtaking Trajectory Visualizer")
+
+st.markdown("""
+    # Dynamic Overtaking Trajectory Visualization
+    
+    The entire graphic, including its SVG and Tailwind CSS styling, is now embedded 
+    directly within this Streamlit Python file for easy deployment.
+""")
+
+# --- 1. Embedded HTML Content (SVG Graphic) ---
+# The complete HTML/SVG structure is stored in a Python triple-quoted string.
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overtaking Trajectories</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for SVG element colors, ensuring they look vibrant */
+        .color-t1 { stroke: #e879f9; } /* Pink */
+        .color-t2 { stroke: #3b82f6; } /* Blue */
+        .color-t3 { stroke: #4b5563; } /* Gray */
+        .color-t4 { stroke: #ef4444; } /* Red */
+        .color-legend-t1 { background-color: #e879f9; }
+        .color-legend-t2 { background-color: #3b82f6; }
+        .color-legend-t3 { background-color: #4b5563; }
+        .color-legend-t4 { background-color: #ef4444; }
+
+        /* Custom road line colors */
+        .road-boundary { stroke: #1f2937; stroke-dasharray: 8 6; }
+        .lane-line { stroke: #fbbf24; } /* Yellow/Orange */
+
+        /* Text positioning for the T labels */
+        .t-label { font-weight: bold; font-family: sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-start justify-center p-4 sm:p-8 min-h-screen font-sans">
+    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl max-w-5xl w-full">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 border-b pb-2">
+            Vehicle Overtaking Strategy Analysis
+        </h1>
+
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <!-- SVG Graphic Container -->
+            <div class="w-full lg:w-3/5 overflow-hidden border-2 border-gray-200 rounded-lg">
+                <!-- SVG Viewport: 800x350 -->
+                <svg viewBox="0 0 800 350" class="w-full h-auto">
+
+                    <!-- Road Boundaries (Dashed Black Lines) -->
+                    <line x1="0" y1="50" x2="800" y2="50" class="road-boundary" stroke-width="3"/>
+                    <line x1="0" y1="300" x2="800" y2="300" class="road-boundary" stroke-width="3"/>
+
+                    <!-- Lane Lines (Solid Orange Lines) -->
+                    <line x1="0" y1="150" x2="800" y2="150" class="lane-line" stroke-width="4"/>
+                    <line x1="0" y1="170" x2="800" y2="170" class="lane-line" stroke-width="4"/>
+
+                    <!-- VEHICLES (Emojis) -->
+                    <!-- Cyclist (Placed at Y=130) -->
+                    <text x="350" y="140" font-size="30">🚴‍♂️</text>
+                    <!-- Car (Placed at Y=130) -->
+                    <text x="600" y="140" font-size="30">🚗</text>
+
+                    <!-- OVERTAKING PATHS (T4, T3, T2) -->
+                    <!-- T4: Large gap overtaking (Red, widest curve) -->
+                    <path
+                        d="M 280 170 C 350 245, 530 245, 600 170"
+                        class="color-t4"
+                        fill="none"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                        stroke-dasharray="10 10"
+                    />
+                    <!-- T3: Medium gap overtaking (Gray) -->
+                    <path
+                        d="M 280 170 C 350 225, 530 225, 600 170"
+                        class="color-t3"
+                        fill="none"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                        stroke-dasharray="10 10"
+                    />
+                    <!-- T2: Small gap overtaking (Blue, tightest curve) -->
+                    <path
+                        d="M 280 170 C 350 205, 530 205, 600 170"
+                        class="color-t2"
+                        fill="none"
+                        stroke-width="5"
+                        stroke-linecap="round"
+                        stroke-dasharray="10 10"
+                    />
+
+                    <!-- FOLLOWING PATH (T1) -->
+                    <!-- T1: Conservative following (Pink, straight dashed line) -->
+                    <line x1="480" y1="130" x2="580" y2="130" class="color-t1" stroke-width="5" stroke-dasharray="10 10" stroke-linecap="round"/>
+
+                    <!-- LABELS -->
+                    <!-- T4 Label (Red) -->
+                    <text x="220" y="175" class="t-label color-t4" font-size="18" fill="#ef4444">T4</text>
+                    <!-- T3 Label (Gray) -->
+                    <text x="250" y="160" class="t-label color-t3" font-size="18" fill="#4b5563">T3</text>
+                    <!-- T2 Label (Blue) -->
+                    <text x="270" y="145" class="t-label color-t2" font-size="18" fill="#3b82f6">T2</text>
+                    <!-- T1 Label (Pink) -->
+                    <text x="450" y="125" class="t-label color-t1" font-size="18" fill="#e879f9">T1</text>
+                </svg>
+            </div>
+
+            <!-- Legend Container -->
+            <div class="w-full lg:w-2/5 flex flex-col justify-start space-y-3 p-4 bg-gray-50 rounded-xl">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">Legend</h2>
+                
+                <!-- Legend Item T1 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-5 h-5 rounded-md color-legend-t1 shadow-md"></div>
+                    <span class="text-gray-700">Conservative following (T1)</span>
+                </div>
+
+                <!-- Legend Item T2 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-5 h-5 rounded-md color-legend-t2 shadow-md"></div>
+                    <span class="text-gray-700">Small gap overtaking (T2)</span>
+                </div>
+
+                <!-- Legend Item T3 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-5 h-5 rounded-md color-legend-t3 shadow-md"></div>
+                    <span class="text-gray-700">Medium gap overtaking (T3)</span>
+                </div>
+
+                <!-- Legend Item T4 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-5 h-5 rounded-md color-legend-t4 shadow-md"></div>
+                    <span class="text-gray-700">Large gap overtaking (T4)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+# 2. Embed the HTML content using components.html
+# The height is set to accommodate the SVG and the legend cleanly.
+components.html(
+    html_content,
+    height=450,
+    scrolling=False
+)
+
+st.subheader("Preset weights for T1-T4")
 st.write(
     "The bars below show the current weight mix used to generate each path. These are example presets only. **T1** is fixed as the conservative baseline (100% policy). The weights for each trajectory always sum to 100%. Move the sliders for Policy, Time, and Safety to set your own weights."
 )
