@@ -2917,7 +2917,7 @@ def stacked_weight_bar_native(xxx, yyy, zzz, is_valid):
     # 1. Prepare data
     data = pd.DataFrame({
         'Category': [f"{EMOJI_POLICY} Policy", f"{EMOJI_TIME} Time Efficiency", f"{EMOJI_SAFETY} Cyclist Safety"],
-        'Weight': [yyy, xxx, zzz],
+        'Weight': [xxx, yyy, zzz],
     })
     
     # 2. Determine Opacity/Color for "Grey Out"
@@ -2982,7 +2982,7 @@ def create_weight_sliders(
     Creates the sliders, validation, stacked animated bar, and controls the run button state.
     
     Returns: 
-        (yyy, xxx, zzz, is_valid)
+        (xxx, yyy, zzz, is_valid)
     """
     
     # Ensure a unique key prefix based on the suffix
@@ -3048,7 +3048,7 @@ def create_weight_sliders(
             st.markdown("<br>", unsafe_allow_html=True)
             
             # Display the Stacked Bar using native Altair
-            stacked_weight_bar_native(yyy, xxx, zzz, is_valid)
+            stacked_weight_bar_native(xxx, yyy, zzz, is_valid)
             
             # Display the validation message
             if not is_valid:
@@ -3089,8 +3089,8 @@ st.header("Step 2: Set Your Own Weights")
 # Use a distinct key_suffix for this set: "evaluator"
 weight_policy, weight_driver, weight_cyclist, is_evaluator_valid = create_weight_sliders(
     full_title="Set your own weights",
-    initial_yyy=0.33, 
     initial_xxx=0.33, 
+    initial_yyy=0.33, 
     initial_zzz=0.34, 
     preset_policy_label=None, # Set to None to hide the preset line
     preset_driver_label=None,
