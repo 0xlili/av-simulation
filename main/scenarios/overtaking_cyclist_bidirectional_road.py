@@ -2562,6 +2562,12 @@ class ScenarioParameters:
     DT = {params['scenario_dt']}  # Time step
     CENTERLINE_LOCATION = {params['scenario_centerline_location']}  # Centerline location for evaluation
     LENGTH = {params['scenario_length']}  # Length of the scenario
+    WIDTH_ROAD = {params['scenario_width_road']} # Width of a single road lane
+    X_LOC_GOAL = {params['scenario_x_loc_goal']} # x location of the goal, right side of the middle of the road
+    Y_LOC_GOAL = {params['scenario_y_loc_goal']} # y location of the goal
+    X_LOC_EGO = {params['scenario_x_loc_ego']} # Initial x location of the ego vehicle (AV), right side of the middle of the road
+    X_LOC_CYCLIST_BUFFER = {params['scenario_x_loc_cyclist_buffer']} # Initial x location of the cyclist
+    Y_LOC_CYCLIST_BUFFER = {params['scenario_y_loc_cyclist_buffer']} # Initial x location of the cyclist
 
 @dataclass
 class ReasonParameters:
@@ -3216,12 +3222,12 @@ if st.button("Run Simulation",
         'scenario_dt': scenario_dt,
         'scenario_centerline_location': scenario_centerline_location,
         'scenario_length': scenario_length,
-        'width_road': scenario_width_road,
-        'x_loc_goal': scenario_x_loc_goal,
-        'y_loc_goal': scenario_y_loc_goal,
-        'x_loc_ego': scenario_x_loc_ego,
-        'x_loc_cyclist_buffer': scenario_x_loc_cyclist_buffer,
-        'y_loc_cyclist_buffer': scenario_y_loc_cyclist_buffer,
+        'scenario_width_road': scenario_width_road,
+        'scenario_x_loc_goal': scenario_x_loc_goal,
+        'scenario_y_loc_goal': scenario_y_loc_goal,
+        'scenario_x_loc_ego': scenario_x_loc_ego,
+        'scenario_x_loc_cyclist_buffer': scenario_x_loc_cyclist_buffer,
+        'scenario_y_loc_cyclist_buffer': scenario_y_loc_cyclist_buffer,
         'reasons_threshold': reasons_threshold,
         'mpc_time_horizon': mpc_time_horizon,
         'mpc_frame_window': mpc_frame_window,
