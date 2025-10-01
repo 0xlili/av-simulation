@@ -2895,7 +2895,7 @@ def set_slider_colors(key, color, value):
 
 
 # --- Helper Function for Stacked Bar (Native Altair) ---
-def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
+def stacked_weight_bar_native(xxx, yyy, zzz, is_valid):
     """
     Creates a single, thick, stacked bar using native Streamlit (Altair).
     """
@@ -2955,8 +2955,8 @@ def stacked_weight_bar_native(yyy, xxx, zzz, is_valid):
 # --- Main Slider Function (Updated to check for run button control) ---
 def create_weight_sliders(
     full_title,
-    initial_yyy, 
     initial_xxx, 
+    initial_yyy, 
     initial_zzz, 
     preset_policy_label,
     preset_driver_label,
@@ -2990,7 +2990,7 @@ def create_weight_sliders(
             
             # Policy Slider (yyy) 
             policy_key = f"{key_prefix}_policy"
-            yyy = st.slider(
+            xxx = st.slider(
                 f"{EMOJI_POLICY} Policy", 
                 min_value=0.0, 
                 max_value=1.0, 
@@ -2998,11 +2998,11 @@ def create_weight_sliders(
                 step=0.01, 
                 key=policy_key
             )
-            set_slider_colors(policy_key, COLOR_POLICY, yyy)
+            set_slider_colors(policy_key, COLOR_POLICY, xxx)
             
             # Time Efficiency Slider (xxx) 
             driver_key = f"{key_prefix}_driver"
-            xxx = st.slider(
+            yyy = st.slider(
                 f"{EMOJI_TIME} Time Efficiency",
                 min_value=0.0,
                 max_value=1.0,
@@ -3010,7 +3010,7 @@ def create_weight_sliders(
                 step=0.01,
                 key=driver_key
             )
-            set_slider_colors(driver_key, COLOR_TIME, xxx)
+            set_slider_colors(driver_key, COLOR_TIME, yyy)
             
             # Cyclist Safety Slider (zzz) 
             cyclist_key = f"{key_prefix}_cyclist"
@@ -3024,7 +3024,7 @@ def create_weight_sliders(
             )
             set_slider_colors(cyclist_key, COLOR_SAFETY, zzz)
             
-        total_sum = yyy + xxx + zzz
+        total_sum = xxx + yyy + zzz
         is_valid = np.isclose(total_sum, 1.0)
 
         with col2:
@@ -3048,7 +3048,7 @@ def create_weight_sliders(
             # The button is disabled if ANY weight set is invalid (i.e., this one)
             st.button("Run Simulation", disabled=not is_valid, type="primary")
 
-    return yyy, xxx, zzz, is_valid
+    return xxx, yyy, zzz, is_valid
 
 # =========================================================================
 # --- MAIN APPLICATION LAYOUT ---
@@ -3060,11 +3060,11 @@ st.header("Step 1: Explore Preset Trajectories")
 # Use a custom key_suffix for the original four sets
 xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
 st.divider()
-xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 50, 0, 50, key_suffix="T2")
+xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 2", 0.4, 0.4, 0.2, 50, 0, 50, key_suffix="T2")
 st.divider()
-xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 0, 50, 50, key_suffix="T3")
+xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 3", 0.5, 0.0, 0.5, 0, 50, 50, key_suffix="T3")
 st.divider()
-xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 4", 0.4, 0.4, 0.2, 40, 40, 20, key_suffix="T4")
+xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 4", 0.0, 0.5, 0.5, 40, 40, 20, key_suffix="T4")
 st.divider()
 
 
