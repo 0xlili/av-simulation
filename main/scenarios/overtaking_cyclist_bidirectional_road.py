@@ -196,7 +196,7 @@ def main(weightofpolicy, weightofdriver, weightofcyclist, ideal_weight_cyclist, 
                               reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, distance_values,
                               reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance,
                               speed_values, time_values, xref_deviation_values, xref_deviation_value,
-                              static_x_axis=True, max_time=15, save_path=save_path)
+                              static_x_axis=True, max_time=15, historical_plot=False, save_path=save_path)
 
 
         # Move all obstacles one step ahead
