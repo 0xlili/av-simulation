@@ -2439,7 +2439,7 @@ def visualize_frame(dt, car_dimensions, bicycle_dimensions, collision_xy, i, mov
                     scenario, simulation, state, tmp_trajectory, trajectory_res,
                     reasons_cyclist_values, reasons_driver_values, reasons_policymaker_values, distance_values,
                     reasons_cyclist_comfort, reasons_driver_time_eff, reasons_policymaker_reg_compliance, speed_values, time_values,  xref_deviation_values, xref_deviation_value,
-                    static_x_axis=True, max_time=20, save_path=None): # ADDED: save_path parameter
+                    static_x_axis=True, max_time=20, save_path=None, historical_plot=False): # ADDED: save_path parameter
     """
     Visualize the simulation frame with an option for static or dynamic x-axis.
 
