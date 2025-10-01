@@ -1,4 +1,6 @@
 # Standard library
+import streamlit.components.v1 as components
+
 import copy
 import csv
 import itertools
@@ -3050,13 +3052,13 @@ def create_weight_sliders(
 st.header("Step 1: Explore Preset Trajectories")
 
 # Use a custom key_suffix for the original four sets
-xxx0, yyy0, zzz0, is_evaluator_valid = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
+xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
 st.divider()
-xxx1, yyy1, zzz1, is_evaluator_valid = create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 50, 0, 50, key_suffix="T2")
+xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 2", 0.5, 0.0, 0.5, 50, 0, 50, key_suffix="T2")
 st.divider()
-xxx2, yyy2, zzz2, is_evaluator_valid = create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 0, 50, 50, key_suffix="T3")
+xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 3", 0.0, 0.5, 0.5, 0, 50, 50, key_suffix="T3")
 st.divider()
-xxx3, yyy3, zzz3, is_evaluator_valid = create_weight_sliders("Trajectory 4", 0.4, 0.4, 0.2, 40, 40, 20, key_suffix="T4")
+xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 4", 0.4, 0.4, 0.2, 40, 40, 20, key_suffix="T4")
 st.divider()
 
 
@@ -3091,15 +3093,15 @@ st.write(
 
 # Place the button inside the designated container. 
 # The disabled state is controlled by the logic below.
-with button_container:
-    # Use the validity flag from the 'Set your own weights' section to disable the button.
-    # The button is ONLY enabled if the user-defined weights sum to 1.0.
-    st.button(
-        "Run Simulation", 
-        disabled=not is_evaluator_valid, 
-        type="primary", 
-        key="main_run_button"
-    )
+# with button_container:
+#     # Use the validity flag from the 'Set your own weights' section to disable the button.
+#     # The button is ONLY enabled if the user-defined weights sum to 1.0.
+#     st.button(
+#         "Run Simulation", 
+#         disabled=not is_evaluator_valid, 
+#         type="primary", 
+#         key="main_run_button"
+#     )
 
 # --- Parameter Inputs (new section) ---
 st.subheader("⚙ Simulation Parameters ")
@@ -3146,9 +3148,14 @@ with st.expander("Expand to edit simulation parameters"):
 
 
 
-import streamlit.components.v1 as components
-
-if st.button("Run Simulation"):
+# st.button(
+#         "Run Simulation", 
+#         disabled=not is_evaluator_valid, 
+#         type="primary", 
+#         key="main_run_button"
+#     )
+if st.button("Run Simulation",
+            disabled=not (is_evaluator_valid and is_evaluator_valid0 and is_evaluator_valid1 and is_evaluator_valid2 and is_evaluator_valid3)):
     st.info("Running simulation...")
     
     # Replace the video with an embedded Dino game clone
