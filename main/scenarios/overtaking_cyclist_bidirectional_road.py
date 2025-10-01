@@ -2720,10 +2720,11 @@ st.write(
 st.markdown(
     """
     Assume we have four possible trajectories: **T1**, **T2**, **T3**, and **T4** as follows:
-    * **T1** (Conservative following): Fully follows traffic rules (policymaker's priority). Ignores cyclist comfort/safety and driver's time efficiency. **Weights**: Policymaker 100%, Cyclist 0%, Driver 0%.
-    * **T2** (Small gap overtaking): Prioritizes driver's time efficiency. Still partly considers policymaker compliance, but only weakly considers cyclist safety. **Weights**: Policymaker 40%, Cyclist 20%, Driver 40%.
-    * **T3** (Medium gap overtaking): Balances policymaker compliance with cyclist safety. Driver's time efficiency is not considered. **Weights**: Policymaker 50%, Cyclist 50%, Driver 0%.
-    * **T4** (Large gap overtaking): Fastest option, prioritizing both driver's time efficiency and cyclist safety. Does not consider policymaker compliance. **Weights**: Policymaker 0%, Cyclist 50%, Driver 50%.
+    * **T1** (Small gap overtaking): Prioritizes driver's time efficiency. Still partly considers policymaker compliance, but only weakly considers cyclist safety. **Weights**: Policymaker 40%, Cyclist 20%, Driver 40%.
+    * **T2** (Medium gap overtaking): Balances policymaker compliance with cyclist safety. Driver's time efficiency is not considered. **Weights**: Policymaker 50%, Cyclist 50%, Driver 0%.
+    * **T3** (Large gap overtaking): Fastest option, prioritizing both driver's time efficiency and cyclist safety. Does not consider policymaker compliance. **Weights**: Policymaker 0%, Cyclist 50%, Driver 50%.
+    * **T4** (Conservative following): Fully follows traffic rules (policymaker's priority). Ignores cyclist comfort/safety and driver's time efficiency. **Weights**: Policymaker 100%, Cyclist 0%, Driver 0%.
+
     """
 )
 
@@ -3071,13 +3072,13 @@ def create_weight_sliders(
 st.header("Step 1: Explore Preset Trajectories")
 
 # Use a custom key_suffix for the original four sets
-xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
+xxx0, yyy0, zzz0, is_evaluator_valid0 = create_weight_sliders("Trajectory 2", 0.4, 0.4, 0.2, 50, 0, 50, key_suffix="T2")
 st.divider()
-xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 2", 0.4, 0.4, 0.2, 50, 0, 50, key_suffix="T2")
+xxx1, yyy1, zzz1, is_evaluator_valid1 = create_weight_sliders("Trajectory 3", 0.5, 0.0, 0.5, 0, 50, 50, key_suffix="T3")
 st.divider()
-xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 3", 0.5, 0.0, 0.5, 0, 50, 50, key_suffix="T3")
+xxx2, yyy2, zzz2, is_evaluator_valid2 = create_weight_sliders("Trajectory 4", 0.0, 0.5, 0.5, 40, 40, 20, key_suffix="T4")
 st.divider()
-xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 4", 0.0, 0.5, 0.5, 40, 40, 20, key_suffix="T4")
+xxx3, yyy3, zzz3, is_evaluator_valid3 = create_weight_sliders("Trajectory 1", 1.0, 0.0, 0.0, 100, 0, 0, key_suffix="T1")
 st.divider()
 
 
