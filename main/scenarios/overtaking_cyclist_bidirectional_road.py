@@ -2698,35 +2698,21 @@ import streamlit as st
 
 st.title("Towards Reasons-Responsive Decisions in Automated Vehicles")
 
-st.write(
-    "This simulator shows how an automated vehicle (AV) can make decisions that respect human reasons. To do this, the AV must:"
-)
-st.markdown(
-    """
-    1.  **Imagine options**: Generate different possible trajectories.
-    2.  **Weigh them up**: Check which option best fits human priorities (like safety, rules, and efficiency).
-    3.  **Commit**: Follow the chosen path smoothly.
-    """
-)
-st.write("Below, we walk through this process for the case of overtaking a cyclist.")
+st.write("This simulator shows how an automated vehicle (AV) can make **decisions that respect human reasons**.")
 
-st.header("Step 1: Generate Possible Paths")
-st.write(
-    "We use an algorithm that creates possible trajectories. It does this by giving weights to different human reasons considerations, such as rules, safety, and efficiency."
-)
+st.write("To do this, the AV must:")
 
-# st.image("Results.pdf", caption="Possible Trajectories", use_column_width=True)
+st.markdown("""
+1.  **Imagine options** – generate different possible trajectories.
+2.  **Weigh them up** – check which option best fits human priorities (like safety, rules, and efficiency).
+3.  **Commit** – follow the chosen path smoothly.
+""")
 
-st.markdown(
-    """
-    Assume we have four possible trajectories: **T1**, **T2**, **T3**, and **T4** as follows:
-    * **T1** (Small gap overtaking): Prioritizes driver's time efficiency. Still partly considers policymaker compliance, but only weakly considers cyclist safety. **Weights**: Policymaker 40%, Cyclist 20%, Driver 40%.
-    * **T2** (Medium gap overtaking): Balances policymaker compliance with cyclist safety. Driver's time efficiency is not considered. **Weights**: Policymaker 50%, Cyclist 50%, Driver 0%.
-    * **T3** (Large gap overtaking): Fastest option, prioritizing both driver's time efficiency and cyclist safety. Does not consider policymaker compliance. **Weights**: Policymaker 0%, Cyclist 50%, Driver 50%.
-    * **T4** (Conservative following): Fully follows traffic rules (policymaker's priority). Ignores cyclist comfort/safety and driver's time efficiency. **Weights**: Policymaker 100%, Cyclist 0%, Driver 0%.
+st.write("Below, we walk through this process for the case of **overtaking a cyclist**. 🚴")
 
-    """
-)
+st.markdown("### 🛣️ Possible Trajectories")
+
+st.write("Assume we have four possible trajectories: T1, T2, T3, and T4 as follows:")
 
 import streamlit.components.v1 as components
 
@@ -2836,11 +2822,53 @@ components.html(
 # 3. Add the requested caption
 st.caption("Figure 1: Comparison of Overtaking Trajectories (T2, T3, T4) and Conservative Following (T1).")
 
+st.write("Each of the trajectories represent its compliance with human reasons:")
 
-st.subheader("Preset weights for T1-T4")
-st.write(
-    "The bars below show the current weight mix used to generate each path. These are example presets only. **T1** is fixed as the conservative baseline (100% policy). The weights for each trajectory always sum to 100%. Move the sliders for Policy, Time, and Safety to set your own weights."
-)
+st.markdown("""
+**T1 (Conservative following 🚦)**
+* Fully follows traffic rules (policymaker's priority).
+* Ignores cyclist comfort/safety and driver's time efficiency.
+* Weights: Policymaker 100%, Cyclist 0%, Driver 0%.
+
+**T2 (Small gap overtaking ⏱️)**
+* Prioritizes driver's time efficiency.
+* Still partly considers policymaker compliance, but only weakly considers cyclist safety.
+* Weights: Policymaker 40%, Cyclist 20%, Driver 40%.
+
+**T3 (Medium gap overtaking 🟢)**
+* Balances policymaker compliance with cyclist safety.
+* Driver's time efficiency not considered.
+* Weights: Policymaker 50%, Cyclist 50%, Driver 0%.
+
+**T4 (Large gap overtaking 🔴)**
+* Fastest option, prioritizing both driver's time efficiency and cyclist safety.
+* Does not consider policymaker compliance.
+* Weights: Policymaker 0%, Cyclist 50%, Driver 50%.
+""")
+
+st.markdown("---") # Creates the horizontal line
+
+st.markdown("### ⚙️ Step 1: Generate Possible Paths")
+
+st.write("We use an algorithm that creates possible trajectories. It does this by giving weights to different human reasons considerations, such as rules, safety, and efficiency.")
+
+st.markdown("""
+* T1 is fixed as the conservative baseline (100% policy).
+* T2-T4 can be adjusted by changing the preset weights below.
+""")
+
+st.markdown("#### Preset weights for T2-T4")
+st.write("The bars below show the current weight mix used to generate each path. These are example presets only.")
+
+st.markdown("""
+* Move the sliders for 👮 Policy, 🚗 Time, and 🚲 Safety to set your own weights.
+* The weights for each trajectory always sum to 100%.
+* T1 stays fixed as the reference case (100% policy).
+""")
+
+st.markdown("👉 **Try it out:** Adjust the sliders to see how your chosen weights generate different overtaking paths.")
+
+
 
 import streamlit as st
 import numpy as np
@@ -3083,7 +3111,21 @@ st.divider()
 
 
 # --- Section 2: Set Your Own Weights (The new set) ---
-st.header("Step 2: Set Your Own Weights")
+st.markdown("### ⚖️ Step 2: Choose Evaluator Weights")
+
+st.write("After generating the possible trajectories, we now **evaluate which one best matches the evaluator weights you set**.")
+
+st.write("Use the sliders to decide how much priority to give to each reason:")
+
+st.markdown("""
+* 🚦 Policymaker (rules)
+* 🚗 Driver (time efficiency)
+* 🚲 Cyclist (safety)
+""")
+
+st.write("For example, if you set 40% for policymaker, 30% for driver, and 30% for cyclist, the system will choose the path that is **most aligned** with that mix.")
+
+st.markdown("👉 **Try it out:** Adjust the weights according to your own preferences and see which trajectory gets selected.")
 
 # This set needs to return its validity flag to control the button
 # Use a distinct key_suffix for this set: "evaluator"
@@ -3106,10 +3148,13 @@ st.divider()
 # Create a container specifically for the button
 button_container = st.container()
 
-st.header("Step 3: Commit and Run the Simulation")
-st.write(
-    "When you click Run Simulation, the algorithm generates three trajectories based on the weights you set. It then identifies the trajectory that best matches those weights. A model predictive control (MPC) module is used to track the selected trajectory."
-)
+st.markdown("### ▶️ Step 3: Commit and Run the Simulation")
+
+st.write("When you click **Run Simulation**, the algorithm generates three trajectories based on the weights you set. It then identifies the trajectory that best matches those weights. A model predictive control (MPC) module is used to track the selected trajectory.")
+
+st.write("The output is a video showing how the AV makes decisions that reflect your chosen priorities.")
+
+st.markdown("👉 **Try it out:** Run the simulation and watch how your chosen priorities shape the AV's behavior.")
 
 # Place the button inside the designated container. 
 # The disabled state is controlled by the logic below.
