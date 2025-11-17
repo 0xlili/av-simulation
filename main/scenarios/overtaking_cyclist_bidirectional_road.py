@@ -756,7 +756,7 @@ def visualize_trajectory_evaluations(eval_results, trajectories_full, moving_obs
             linestyle=style,
             linewidth=width * 2,  # Make lines thicker for better visibility
             #label=f"Traj {i}: {traj_description} (Score: {score:.3f})"  # Enhanced label
-            label=f"Trajectory {i+1} \n {traj_description} \n"  # Enhanced label
+            label=f"Trajectory {i+1} \n"  # Enhanced label
         )
 
     goal_x, goal_y = trajectory_points[0, 0], ScenarioParameters.LENGTH/2
